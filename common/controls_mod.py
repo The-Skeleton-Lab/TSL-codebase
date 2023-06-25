@@ -9,7 +9,7 @@ class controls():
     Examples - 
     import controls as c
     cc = c.controls()
-    #creating control -
+    #creating control - 
     cc.create_control(basename = 'Krishna',zgrps =2,curveType= 'Sphere',sub_controls =4)
     #scaling control just need any group from the module -
     cc.scale_control_module(obj = 'Krishna_01_zero_group',val = .8)
@@ -39,6 +39,7 @@ class controls():
                 - green  .5, .9, .4
                 - white 1, 1, 1
         line_thickness - sets the line thickness for the control shape by default 1.5
+        TODO create joint, joint grp
         #
         #
         #
@@ -193,6 +194,7 @@ class controls():
             i.overrideColorB.set(color[2])
             i.lineWidth.set(line_thickness)
         if create_joint:
+            #TODO code this
             pass
         #ctl_output
         ctl_output = pm.createNode('transform',n = basename+'_ctrl_output')
@@ -223,6 +225,9 @@ class controls():
         return cgrp,ctl_output, extra_grps[0]
     
     def scale_control_module(self,obj,val=1):
+        '''
+        TODO add doc
+        '''
         children = pm.listRelatives(obj,ad=1, typ = 'transform')
         ctrl_grp = None
         shape = BSControlsUtils()

@@ -1,8 +1,8 @@
 import pymel.core as pm
-import common.controls as ctls
-import common.utils as ut
+import common.controls_mod as ctls
+import common.utils_mod as ut
 class tf_class(object):
-    def create_transform(self,Trname = 'temp',pos = None, parent= '',typ = 'transform',root_joint = None,inheritTransform = 1,child = None, make_local =True):
+    def create_transform(self,Trname = 'temp',pos = None, parent= '',typ = 'transform',root_joint = None,inheritTransform = 1,child = None, make_local =False):
         """
         create_transform
         Args:
@@ -46,16 +46,17 @@ class tf_class(object):
             utz.object_tag(trf)
 
             pm.parent(trf,ggrp)
+            
+            trf = ggrp
 
-
-            pass
+            
 
         else:
-            trf = pm.createNode('transform', n = Trname+'_grp')
+            trf = pm.createNode('transform', n = Trname+'_group')
             utz.object_tag(trf)
         
         
-        pass
+        
     
         if pos == None:
             Posmtx = pm.datatypes.Matrix()
@@ -102,5 +103,6 @@ class tf_class(object):
             return trf,grp
         if make_local is False:
             return trf
+        
 
         
