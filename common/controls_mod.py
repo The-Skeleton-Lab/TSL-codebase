@@ -1,8 +1,8 @@
 import maya.cmds as cmds
 import pymel.core as pm
 import random
-import common.utils as ut
-import common.transforms as trs
+import common.utils_mod as ut
+import common.transforms_mod as trs
 class controls():
     '''
     control class for making and editing controls
