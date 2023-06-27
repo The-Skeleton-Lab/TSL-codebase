@@ -25,18 +25,23 @@ class master_module():
         base_grp = tr.create_transform(Trname='master_main',make_local=False)
         
         #create guides
-        master_gd = tr.create_transform(Trname='master_guide',make_local=False)
-        guide_01 = tr.create_transform(Trname = 'master_gd', typ = 'guide',make_local=False)
-        pm.parent([master_gd],base_grp)
-        pm.parent(guide_01,master_gd)
+        master_gd = tr.create_transform(Trname='master_guide',make_local=False,parent=base_grp)
+        guide_01 = tr.create_transform(Trname = 'master_gd', typ = 'guide',make_local=False,parent = master_gd)
+        #pm.parent([master_gd],base_grp)
+        #pm.parent(guide_01,master_gd)
         
         #create controls
-        master_ct = tr.create_transform(Trname='master_ctrl',make_local=False)
-        pm.parent(master_ct,base_grp)
-        
+        master_ct = tr.create_transform(Trname='master_ctrl',make_local=False,parent=base_grp)
+        #pm.parent(master_ct,base_grp)
+        main_ctrl = cm.create_control(basename='master',curveType = 'Four Arrows',sub_controls=3,zgrps=0)
+        pm.parent(main_ctrl,master_ct)
+
+
         #createskeleton
-        master_sk = tr.create_transform(Trname='master_jnt',make_local=False)
-        pm.parent(master_sk,base_grp)
+        master_sk = tr.create_transform(Trname='master_jnt',make_local=False,parent = base_grp)
+        #pm.parent(master_sk,base_grp)
+        root_skel = tr.create_transform(Trname= 'root',typ='joint',parent=master_sk)
+        main_skel = tr.create_transform(Trname= 'master',typ='joint',parent=root_skel)
 
         for i in [base_grp,master_gd,master_ct,master_sk]:
             utz.object_tag(i)

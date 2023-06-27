@@ -37,6 +37,14 @@ class tf_class(object):
         elif typ == 'guide':
         
             trf = pm.PyNode(shape.bsDrawCurve(curve = 'Locator',name = Trname+'_gd'))
+            shapes = pm.listRelatives(trf,shapes=True)
+            for sh in shapes:
+                    sh.overrideEnabled.set(1)
+                    sh.overrideRGBColors.set(1)
+                    sh.overrideColorR.set(.35)
+                    sh.overrideColorG.set(.9)
+                    sh.overrideColorB.set(.6)
+                    sh.lineWidth.set(1.1)
             trf.v.setLocked(1)
             trf.v.setKeyable(0)   
             

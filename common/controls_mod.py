@@ -13,14 +13,15 @@ class controls():
     cc.create_control(basename = 'Krishna',zgrps =2,curveType= 'Sphere',sub_controls =4)
     #scaling control just need any group from the module -
     cc.scale_control_module(obj = 'Krishna_01_zero_group',val = .8)
+    TODO thin about parent
     '''
     def create_control(self, curveType = 'Square', basename = 'temp',zgrps = 1,pos = None, sub_controls =1, cons_from = None,cons_to =None ,cons_typ_mtx = True , inheritTr= 1, color = [.4,.5,.7], line_thickness = 1.5, create_joint = False, jnt_grp = True):
         '''
         #
         #
         #
-        Avilable curve types - 
-        ['Circle', 'Half Circle', 'Square', 'Triangle', 'Sphere', 'Half Sphere','Box', 'Pyramid', 'Diamond', 'Circle Pin','Square Pin','Curved Four Arrows', 
+        Avilable 
+        curveType - ['Circle', 'Half Circle', 'Square', 'Triangle', 'Sphere', 'Half Sphere','Box', 'Pyramid', 'Diamond', 'Circle Pin','Square Pin','Curved Four Arrows', 
                 'Curved Four Arrows Thin', 'Two Arrows', 'Two Arrows Thin', 'Curved Two Arrows', 'Curved Two Arrows Thin', 'One Arrow', 'Sphere Pin',
                 'Circle Dumbbell', 'Square Dumbbell', 'Sphere Dumbbell', 'Cross', 'Cross Thin', 'Locator', 'Four Arrows', 'Four Arrows Thin',
                 'One Arrow Thin','Circle One Arrow',  'Circle Two Arrows', 'Circle Three Arrows', 'Circle Four Arrows', 'Sphere Four Arrows', 'Gear']
