@@ -13,9 +13,8 @@ class controls():
     cc.create_control(basename = 'Krishna',zgrps =2,curveType= 'Sphere',sub_controls =4)
     #scaling control just need any group from the module -
     cc.scale_control_module(obj = 'Krishna_01_zero_group',val = .8)
-    TODO thin about parent
     '''
-    def create_control(self, curveType = 'Square', basename = 'temp',zgrps = 1,pos = None, sub_controls =1, cons_from = None,cons_to =None ,cons_typ_mtx = True , inheritTr= 1, color = [.4,.5,.7], line_thickness = 1.5, create_joint = False, jnt_grp = True):
+    def create_control(self, curveType = 'Square', basename = 'temp',zgrps = 1,pos = None, sub_controls =1, cons_from = None,cons_to =None ,cons_typ_mtx = True , inheritTr= 1, color = [.4,.5,.7], line_thickness = 1.5, create_joint = False, jnt_grp = True,parent_to =None):
         '''
         #
         #
@@ -40,7 +39,7 @@ class controls():
                 - green  .5, .9, .4
                 - white 1, 1, 1
         line_thickness - sets the line thickness for the control shape by default 1.5
-        TODO create joint, joint grp
+        
         #
         #
         #
@@ -62,11 +61,11 @@ class controls():
             jnt_grp = pm.createNode('transform', name  =basename+'_ctrl_jnt_grp')
             utz.object_tag(jnt_grp)
         
-        jnt_grp.v.set(0)
-        jnt_grp.v.setLocked(1)
-        jnt_grp.v.setKeyable(0)
+            jnt_grp.v.set(0)
+            jnt_grp.v.setLocked(1)
+            jnt_grp.v.setKeyable(0)
 
-        pm.parent(jnt_grp,cgrp)
+            pm.parent(jnt_grp,cgrp)
 
 
         utz.object_tag(cgrp,'control_grp')
@@ -113,6 +112,7 @@ class controls():
         sub_ctrls = []
         pm.addAttr(ctl, ln = 'sub_vis',at = 'bool', dv =0)
         if sub_controls > 0:
+            
             for i in range(1,sub_controls+1):
                 tr_node = pm.PyNode(shape.bsDrawCurve(curve = curveType,name = '%s_0%d_sub_ctrl'%(basename,i)))
                 sub_ctrls.append(tr_node)
@@ -138,7 +138,7 @@ class controls():
                     pm.parent(tr_node,sub_ctrls[i-2])
                 
             pm.parent(sub_ctrls[0],ctl)
-            last_output_node = sub_ctrls[-1]
+            last_output_node = sub_ctrls[0]
         else:
             last_output_node = ctl
         #cons_from
@@ -194,14 +194,16 @@ class controls():
             i.overrideColorG.set(color[1])
             i.overrideColorB.set(color[2])
             i.lineWidth.set(line_thickness)
-        if create_joint:
-            #TODO code this
-            pass
+
+
+
         #ctl_output
         ctl_output = pm.createNode('transform',n = basename+'_ctrl_output')
         utz.object_tag(ctl_output)
         ctl_output.v.set(0)
-        pm.parent(ctl_output,last_output_node)
+        last_control = pm.listRelatives(ctl,ad=1,typ ='transform')[0]
+        pm.parent(ctl_output,last_control)
+        
         #inherit Transform for first group of the control
         extra_grps[0].inheritsTransform.set(inheritTr)
         #crerate control message attr for shape scales
@@ -223,6 +225,14 @@ class controls():
             pm.connectAttr(i.message,'%s.controls[0].%s'%(cgrp,i2))
         
         pm.select(cl=1)
+        if create_joint:
+            t = trs.tf_class()
+            jnt = t.create_transform(Trname=basename+'_ctrl',typ='joint')
+            print (jnt)
+            pm.parent(jnt,jnt_grp)
+            ctl_output.worldMatrix[0]>>jnt.offsetParentMatrix
+        if parent_to:
+            pm.parent(extra_grps[0],parent_to)
         return cgrp,ctl_output, extra_grps[0]
     
     def scale_control_module(self,obj,val=1):

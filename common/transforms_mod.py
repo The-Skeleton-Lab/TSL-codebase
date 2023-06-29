@@ -2,13 +2,13 @@ import pymel.core as pm
 import common.controls_mod as ctls
 import common.utils_mod as ut
 class tf_class(object):
-    def create_transform(self,Trname = 'temp',pos = None, parent= '',typ = 'transform',root_joint = None,inheritTransform = 1,child = None, make_local =False):
+    def create_transform(self,Trname = 'temp',pos = None, parent= None,typ = 'transform',root_joint = None,inheritTransform = 1,child = None, make_local =False):
         """
         create_transform
         Args:
-            TODO update args
-            TODO create obj type arg
-            TODO fix upper group with query and make local 
+            TODO update doc
+            
+            
             Trname: Name of the transform : String
                 makeLocal
 
@@ -25,15 +25,16 @@ class tf_class(object):
         utz = ut.utilites()
         ct = ctls.controls()
         shape = ctls.BSControlsUtils()
+        
         if typ == 'joint':
-            trf = pm.createNode('joint', n = Trname.replace('grp','jnt'))
+            trf = pm.createNode('joint', n = Trname+'_jnt')
             trf.jox.setKeyable(1)
             trf.joy.setKeyable(1)
             trf.joz.setKeyable(1)
             utz.object_tag(trf, 'joint')
             if root_joint:
                 root_attr = pm.addAttr(trf,dt = 'string',ln = 'rootJoint')
-                trf.rootJoint.set(root_joint)
+                trf.rootJoint.set('root_joint')
         elif typ == 'guide':
         
             trf = pm.PyNode(shape.bsDrawCurve(curve = 'Locator',name = Trname+'_gd'))
@@ -50,12 +51,8 @@ class tf_class(object):
             
             utz.object_tag(trf,'guide')
             
-            ggrp = pm.createNode('transform', name  =Trname+'_gd_group')
-            utz.object_tag(trf)
-
-            pm.parent(trf,ggrp)
             
-            trf = ggrp
+            
 
             
 
@@ -91,8 +88,7 @@ class tf_class(object):
                 pm.parent(trf,parent)
             except:
                 raise RuntimeError('Parent not found')
-        else:
-            pass
+
         if inheritTransform ==0:
             trf.inheritsTransform.set(0)
         if child:
@@ -102,14 +98,24 @@ class tf_class(object):
             pm.delete(pm.parentConstraint(trf,grp))
             pm.parent(trf,grp)
             if typ == 'joint':
-
                 trf.jointOrientX.set(0)
                 trf.jointOrientY.set(0)
                 trf.jointOrientZ.set(0)
                 trf.rotate.set(0,0,0)
-
-            return trf,grp
+            if parent !=None:
+                try:
+                    pm.parent(grp,parent)
+                except:
+                    raise RuntimeError('Parent not found')
+            
+            return grp,trf
+        
         if make_local is False:
+            if parent !=None:
+                try:
+                    pm.parent(trf,parent)
+                except:
+                    raise RuntimeError('Parent not found')
             return trf
         
 
