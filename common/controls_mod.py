@@ -134,7 +134,7 @@ class controls():
                 if i == 1:
                     pass
                 else:
-                    print (tr_node)
+
                     pm.parent(tr_node,sub_ctrls[i-2])
                 
             pm.parent(sub_ctrls[0],ctl)

@@ -7,7 +7,6 @@ import common.attributes_mod as at
 class utilites():
     '''
     TODO write doc
-    TODO add a def to add string attribute for asset name
     '''
     
     def object_tag(self,obj = None,Data = 'transform' ):

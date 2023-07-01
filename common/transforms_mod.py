@@ -36,7 +36,7 @@ class tf_class(object):
                 root_attr = pm.addAttr(trf,dt = 'string',ln = 'rootJoint')
                 trf.rootJoint.set('root_joint')
         elif typ == 'guide':
-        
+            #TODO scale the guides smaller
             trf = pm.PyNode(shape.bsDrawCurve(curve = 'Locator',name = Trname+'_gd'))
             shapes = pm.listRelatives(trf,shapes=True)
             for sh in shapes:
