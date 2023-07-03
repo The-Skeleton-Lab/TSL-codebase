@@ -44,7 +44,7 @@ class master_module():
         pm.parent(main_ctrl[-1],master_ct)
 
 
-        #createskeleton
+        #create skeleton
         master_sk = tr.create_transform(Trname='master_jnt',make_local=False,parent = base_grp)
         
         root_skel = tr.create_transform(Trname= 'root',typ='joint',parent=master_sk,root_joint = True)
