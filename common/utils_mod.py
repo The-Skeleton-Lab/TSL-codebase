@@ -7,6 +7,7 @@ import common.attributes_mod as at
 class utilites():
     '''
     TODO write doc
+    TODO add transform lock option
     '''
     
     def object_tag(self,obj = None,Data = 'transform' ):

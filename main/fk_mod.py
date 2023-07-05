@@ -7,6 +7,7 @@ imp.reload(controls_mod)
 class fk_module():
     '''
     TODO write doc
+    TODO turn of inherit in all groups
     '''
 
     def create_fk_chain(self,base_rig_group = None, count = 1,curveType = 'Square', basename = 'temp', sub_controls =1,parent_to =None,pos = None):
@@ -27,7 +28,6 @@ class fk_module():
         
         #createNetwork_grps
         network = tr.create_transform(Trname='%s_fk_network'%basename,make_local=False,parent = base_grp)
-        #pm.parent(master_sk,base_grp)
         input_ntw = tr.create_transform(Trname= '%s_fk_input'%basename, parent=network)
         output_ntw = tr.create_transform(Trname= '%s_fk_output'%basename, parent=network)
  
@@ -35,8 +35,6 @@ class fk_module():
         #create guides
         guide_grp = tr.create_transform(Trname='%s_fk_guide'%basename,make_local=False,parent=base_grp)
         
-        #guide_01 = tr.create_transform(Trname = 'master', typ = 'guide',make_local=False,parent = guide_grp)
- 
         #create controls
         main_ctrl_grp = tr.create_transform(Trname='%s_fk_ctrl'%basename,make_local=False,parent=base_grp)
 
