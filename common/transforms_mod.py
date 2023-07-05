@@ -8,7 +8,8 @@ class tf_class(object):
         Args:
             TODO update doc
             TODO add joint style option
-            
+            TODO scaling guide option
+            TODO guide color
             
             Trname: Name of the transform : String
                 makeLocal

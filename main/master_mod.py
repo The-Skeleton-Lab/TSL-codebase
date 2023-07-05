@@ -12,8 +12,8 @@ class master_module():
     def createMaster(self,base_rig_group = None, asset_name = '' ):
         '''
         TODO write doc
-        
-
+        TODO addd simple output which will be used in all the modules, end guide &  end control output
+        TODO remove inherits
         '''
         # classes intialize
 
@@ -27,6 +27,7 @@ class master_module():
         base_grp = tr.create_transform(Trname='master_main',make_local=False)
         
         #createNetwork_grps
+        #TODO add utz input output
         master_network = tr.create_transform(Trname='master_network',make_local=False,parent = base_grp)
         input_ntw = tr.create_transform(Trname= 'master_input',parent=master_network)
         output_ntw = tr.create_transform(Trname= 'master_output',parent=master_network)
@@ -66,5 +67,7 @@ class master_module():
         main_ctrl[1].worldMatrix[0]>>main_skel.offsetParentMatrix
         
         utz.add_world_mtxs_to_output(output_ntw,main_ctrl[1])
-
+        utz.add_world_mtxs_to_output(output_ntw,guide_01)
         
+        #returns
+        return base_grp,input_ntw,output_ntw

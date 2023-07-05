@@ -33,15 +33,20 @@ class fk_module():
  
      
         #create guides
-        guide_grp = tr.create_transform(Trname='%s_fk_guide'%basename,make_local=False,parent=base_grp)
+        guide_grp = tr.create_transform(Trname='%s_fk_guide'%basename,make_local=False,parent=base_grp,inheritTransform =0)
         
         #create controls
-        main_ctrl_grp = tr.create_transform(Trname='%s_fk_ctrl'%basename,make_local=False,parent=base_grp)
+        main_ctrl_grp = tr.create_transform(Trname='%s_fk_ctrl'%basename,make_local=False,parent=base_grp,inheritTransform =0)
 
 
         #createskeleton
-        skeleton_grp = tr.create_transform(Trname='%s_fk_jnt'%basename, make_local=False,parent = base_grp)
-  
+        skeleton_grp = tr.create_transform(Trname='%s_fk_jnt'%basename, make_local=False,parent = base_grp,inheritTransform =0)
+        
+        #create inputs for parent
+        atz.add_matrix_attr(input_ntw,atrName= 'parent_control_mtx')
+        atz.add_matrix_attr(input_ntw,atrName= 'parent_guide_mtx')
+
+
         #creating guides, controls and skel
             #guides
         gd_grps = []
@@ -57,7 +62,8 @@ class fk_module():
                 utz.object_tag(gd,'guide')
                 
                 if i == 1:
-                    pass
+                    pm.connectAttr(input_ntw.parent_guide_mtx,gd_grp.offsetParentMatrix)
+                    
                 else:
                     gd_grp.translateY.set((i-1)*(2))
                     pm.parent(gd_grp,gds[i-2])
@@ -81,8 +87,14 @@ class fk_module():
                 
                 if i == 1:
                     pm.parent(ctrl_grp,main_ctrl_grp)
-                    pm.connectAttr(gds[0].worldMatrix[0],ctrl_grp.offsetParentMatrix)
-                    
+                    multMtx = pm.createNode('multMatrix',n = '%s_0%d_multMtx'%(basename,i))
+                    invMtx = pm.createNode('inverseMatrix',n = '%s_0%d_invMtx'%(basename,i))
+                    pm.connectAttr(gds[0].worldMatrix[0],multMtx.matrixIn[0])
+                    pm.connectAttr(input_ntw.parent_guide_mtx,invMtx.inputMatrix)
+                    pm.connectAttr(invMtx.outputMatrix,multMtx.matrixIn[1])
+                    pm.connectAttr(input_ntw.parent_control_mtx,multMtx.matrixIn[2])  
+                    pm.connectAttr(multMtx.matrixSum,ctrl_grp.offsetParentMatrix)
+
                 else:
                     multMtx = pm.createNode('multMatrix',n = '%s_0%d_multMtx'%(basename,i))
                     pm.connectAttr(gds[i-1].worldMatrix[0],multMtx.matrixIn[0])
@@ -106,6 +118,5 @@ class fk_module():
                 
         
 
-            
-
-        pass
+            #returns
+            return base_grp,input_ntw,output_ntw
