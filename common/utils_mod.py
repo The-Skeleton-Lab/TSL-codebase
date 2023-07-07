@@ -24,7 +24,7 @@ class utilites():
 
 
 
-    def add_world_mtxs_to_output(self,output_ntw='',object=''):
+    def add_world_mtxs_to_output(self,output_ntw='',object='', custom_name = None, inverse_attr = False):
         attr_class = at.attributes()
         if output_ntw !='':
             pass
@@ -34,11 +34,16 @@ class utilites():
             pass
         else:
             raise RuntimeError('%s object network node not found'%object)
-            
-        attr_class.add_matrix_attr(output_ntw,atrName='%s_worldMatrix'%object)
-        pm.connectAttr(object+'.worldMatrix[0]',output_ntw+'.%s_worldMatrix'%object)
-        attr_class.add_matrix_attr(output_ntw,atrName='%s_worldInverseMatrix'%object)
-        pm.connectAttr(object+'.worldInverseMatrix[0]',output_ntw+'.%s_worldInverseMatrix'%object)
+        if custom_name != None:
+            attrName = custom_name 
+        else:
+            attrName='%s_worldMatrix'%object
+        attr_class.add_matrix_attr(output_ntw,attrName)
+        pm.connectAttr(object+'.worldMatrix[0]',output_ntw+'.%s'%attrName)
+        
+        if inverse_attr:
+            attr_class.add_matrix_attr(output_ntw,atrName='%s_worldInverseMatrix'%object)
+            pm.connectAttr(object+'.worldInverseMatrix[0]',output_ntw+'.%s_worldInverseMatrix'%object)
         
 
 

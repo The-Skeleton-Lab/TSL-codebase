@@ -1,2 +1,8 @@
 
 .DS_Store
+main/__pycache__/master_mod.cpython-310.pyc
+rig_templates/__pycache__/fk_prop.cpython-310.pyc
+common/__pycache__/controls_mod.cpython-310.pyc
+common/__pycache__/transforms_mod.cpython-310.pyc
+common/__pycache__/utils_mod.cpython-310.pyc
+*.pyc

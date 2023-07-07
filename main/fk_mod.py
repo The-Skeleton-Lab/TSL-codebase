@@ -7,7 +7,6 @@ imp.reload(controls_mod)
 class fk_module():
     '''
     TODO write doc
-    TODO turn of inherit in all groups
     '''
 
     def create_fk_chain(self,base_rig_group = None, count = 1,curveType = 'Square', basename = 'temp', sub_controls =1,parent_to =None,pos = None):
@@ -30,6 +29,8 @@ class fk_module():
         network = tr.create_transform(Trname='%s_fk_network'%basename,make_local=False,parent = base_grp)
         input_ntw = tr.create_transform(Trname= '%s_fk_input'%basename, parent=network)
         output_ntw = tr.create_transform(Trname= '%s_fk_output'%basename, parent=network)
+        utz.object_tag(input_ntw,'input_network')
+        utz.object_tag(output_ntw,'output_network')
  
      
         #create guides
@@ -59,6 +60,7 @@ class fk_module():
                 gd = tr.create_transform(Trname = '%s_0%d_fk'%(basename,i), typ = 'guide',make_local=False,parent = gd_grp)
                 gd_grps.append(gd_grp)
                 gds.append(gd)
+                utz.add_world_mtxs_to_output(output_ntw,gd)
                 utz.object_tag(gd,'guide')
                 
                 if i == 1:
@@ -117,6 +119,10 @@ class fk_module():
                 pm.connectAttr(ctrls[i-1].worldMatrix[0],jnt.offsetParentMatrix)
                 
         
-
-            #returns
-            return base_grp,input_ntw,output_ntw
+        #adding outputs
+        
+        utz.add_world_mtxs_to_output(output_ntw,ctrls[-1],custom_name='end_ctrl_out')
+        utz.add_world_mtxs_to_output(output_ntw,gds[-1],custom_name='end_guide_out')
+        
+        #returns
+        return base_grp,input_ntw,output_ntw

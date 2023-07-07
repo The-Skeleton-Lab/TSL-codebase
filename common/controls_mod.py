@@ -237,7 +237,8 @@ class controls():
     
     def scale_control_module(self,obj,val=1):
         '''
-        TODO add doc
+        
+        cc.scale_control_module(obj = 'Krishna_01_zero_group',val = .8)
         '''
         children = pm.listRelatives(obj,ad=1, typ = 'transform')
         ctrl_grp = None

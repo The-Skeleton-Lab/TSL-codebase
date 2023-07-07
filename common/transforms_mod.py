@@ -2,14 +2,11 @@ import pymel.core as pm
 import common.controls_mod as ctls
 import common.utils_mod as ut
 class tf_class(object):
-    def create_transform(self,Trname = 'temp',pos = None, parent= None,typ = 'transform',root_joint = None,inheritTransform = 1,child = None, make_local =False):
+    def create_transform(self,Trname = 'temp',pos = None, parent= None,typ = 'transform',root_joint = None,inheritTransform = 1,child = None, make_local =False, joint_style = 0,guide_scale =1,guide_color  = [.7,.3,.7]):
         """
         create_transform
         Args:
             TODO update doc
-            TODO add joint style option
-            TODO scaling guide option
-            TODO guide color
             
             Trname: Name of the transform : String
                 makeLocal
@@ -37,20 +34,20 @@ class tf_class(object):
             if root_joint:
                 root_attr = pm.addAttr(trf,dt = 'string',ln = 'rootJoint')
                 trf.rootJoint.set('root_joint')
+            trf.drawStyle.set(joint_style)
         elif typ == 'guide':
-            #TODO scale the guides smaller
             trf = pm.PyNode(shape.bsDrawCurve(curve = 'Locator',name = Trname+'_gd'))
             shapes = pm.listRelatives(trf,shapes=True)
             for sh in shapes:
                     sh.overrideEnabled.set(1)
                     sh.overrideRGBColors.set(1)
-                    sh.overrideColorR.set(.35)
-                    sh.overrideColorG.set(.9)
-                    sh.overrideColorB.set(.6)
+                    sh.overrideColorR.set(guide_color[0])
+                    sh.overrideColorG.set(guide_color[1])
+                    sh.overrideColorB.set(guide_color[2])
                     sh.lineWidth.set(1.1)
             trf.v.setLocked(1)
             trf.v.setKeyable(0)   
-            
+            shape.shape_scale_adjust([trf],guide_scale)
             utz.object_tag(trf,'guide')
             
             
