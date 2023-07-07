@@ -14,7 +14,7 @@ class controls():
     #scaling control just need any group from the module -
     cc.scale_control_module(obj = 'Krishna_01_zero_group',val = .8)
     '''
-    def create_control(self, curveType = 'Square', basename = 'temp',zgrps = 1,pos = None, sub_controls =1, cons_from = None,cons_to =None ,cons_typ_mtx = True , inheritTr= 1, color = [.4,.5,.7], line_thickness = 1.5, create_joint = False, jnt_grp = True,parent_to =None):
+    def create_control(self, curveType = 'Square', basename = 'temp',zgrps = 1,pos = None, sub_controls =1, cons_from = None,cons_to =None ,cons_typ_mtx = True , inheritTr= 1, color = [.4,.5,.7], line_thickness = 1.5, create_joint = False, jnt_grp = True,parent_to =None, control_scale = 1):
         '''
         #
         #
@@ -52,7 +52,8 @@ class controls():
         ctl = pm.PyNode(shape.bsDrawCurve(curve = curveType,name = basename+'_ctrl'))
         ctl.v.setLocked(1)
         ctl.v.setKeyable(0)   
-        
+            
+
         utz.object_tag(ctl,'control')
         
         cgrp = pm.createNode('transform', name  =basename+'_ctrl_group')
@@ -233,6 +234,12 @@ class controls():
             ctl_output.worldMatrix[0]>>jnt.offsetParentMatrix
         if parent_to:
             pm.parent(extra_grps[0],parent_to)
+
+        #shape scale
+        for i in sub_ctrls:
+            shape.shape_scale_adjust([i],control_scale)
+        shape.shape_scale_adjust([ctl],control_scale)
+        
         return cgrp,ctl_output, extra_grps[0]
     
     def scale_control_module(self,obj,val=1):

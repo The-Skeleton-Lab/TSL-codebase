@@ -25,7 +25,7 @@ def build_rig(asset_name = 'base'):
 
     #creating the fk chain
     fkchain = fk1.fk_module()
-    fk1_objs = fkchain.create_fk_chain(count =5,basename = 'Sid')
+    fk1_objs = fkchain.create_fk_chain(count =5,basename = '%s_fk_01'%asset_name,shape_scale = .5)
 
     #connecting the modules
     master_objs[2].end_guide_out>>fk1_objs[1].parent_guide_mtx

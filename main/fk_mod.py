@@ -9,7 +9,7 @@ class fk_module():
     TODO write doc
     '''
 
-    def create_fk_chain(self,base_rig_group = None, count = 1,curveType = 'Square', basename = 'temp', sub_controls =1,parent_to =None,pos = None):
+    def create_fk_chain(self,base_rig_group = None, count = 1,curveType = 'Square', basename = 'temp', sub_controls =1,parent_to =None,pos = None,shape_scale = 1):
         """
         TODO write doc
 
@@ -57,7 +57,7 @@ class fk_module():
             
             for i in range(1,count+1):
                 gd_grp =  tr.create_transform(Trname='%s_0%d_fk_guide'%(basename,i), make_local=False)
-                gd = tr.create_transform(Trname = '%s_0%d_fk'%(basename,i), typ = 'guide',make_local=False,parent = gd_grp)
+                gd = tr.create_transform(Trname = '%s_0%d_fk'%(basename,i), typ = 'guide',make_local=False,parent = gd_grp,guide_scale=shape_scale)
                 gd_grps.append(gd_grp)
                 gds.append(gd)
                 utz.add_world_mtxs_to_output(output_ntw,gd)
@@ -81,7 +81,7 @@ class fk_module():
             for i in range(1,count+1):
                 ctrl_grp =  pm.PyNode(tr.create_transform(Trname='%s_0%d_fk_base_ctrl'%(basename,i), make_local=False))
                 
-                ctl = cm.create_control(basename='%s_0%d_fk'%(basename,i),curveType = curveType,sub_controls=1,zgrps=0,parent_to=ctrl_grp)[1]
+                ctl = cm.create_control(basename='%s_0%d_fk'%(basename,i),curveType = curveType,sub_controls=1,zgrps=0,parent_to=ctrl_grp,control_scale=shape_scale)[1]
                 utz.add_world_mtxs_to_output(output_ntw,ctl)
                 ctrl_grps.append(ctrl_grp)
                 ctrls.append(ctl)

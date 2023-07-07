@@ -7,9 +7,10 @@ imp.reload(controls_mod)
 class master_module():
     '''
     TODO write doc
+    TODO add shape scale option
     '''
 
-    def createMaster(self,base_rig_group = None, asset_name = '' ):
+    def createMaster(self,base_rig_group = None, asset_name = '', shape_scale = 1):
         '''
         TODO write doc
         '''
