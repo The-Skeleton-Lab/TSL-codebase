@@ -7,6 +7,7 @@ imp.reload(controls_mod)
 class fk_module():
     '''
     TODO write doc
+    TODO add tweak
     '''
 
     def create_fk_chain(self,base_rig_group = None, count = 1,curveType = 'Square', basename = 'temp', sub_controls =1,parent_to =None,pos = None,shape_scale = 1):

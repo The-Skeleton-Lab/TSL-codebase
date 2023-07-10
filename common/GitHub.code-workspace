@@ -10,6 +10,7 @@
 		"explorer.autoRevealExclude": {
 			"**/.pyc": true
 		},
-		"explorer.excludeGitIgnore": true
+		"explorer.excludeGitIgnore": true,
+		"workbench.colorTheme": "Solarized Light"
 	}
 }

@@ -10,7 +10,7 @@ class master_module():
     TODO add shape scale option
     '''
 
-    def createMaster(self,base_rig_group = None, asset_name = '', shape_scale = 1):
+    def createMaster(self,base_rig_group = None, asset_name = '', shape_scale = 2):
         '''
         TODO write doc
         '''
@@ -35,13 +35,13 @@ class master_module():
      
         #create guides
         master_gd = tr.create_transform(Trname='master_guide',make_local=False,parent=base_grp,inheritTransform =0)
-        guide_01 = tr.create_transform(Trname = 'master', typ = 'guide',make_local=False,parent = master_gd,inheritTransform =0)
+        guide_01 = tr.create_transform(Trname = 'master', typ = 'guide',make_local=False,parent = master_gd,inheritTransform =0,guide_scale=shape_scale)
 
         
         #create controls
         master_ct = tr.create_transform(Trname='master_ctrl',make_local=False,parent=base_grp,inheritTransform =0)
 
-        main_ctrl = cm.create_control(basename='master',curveType = 'Four Arrows',sub_controls=3,zgrps=0)
+        main_ctrl = cm.create_control(basename='master',curveType = 'Four Arrows',sub_controls=3,zgrps=0,control_scale=shape_scale)
         pm.parent(main_ctrl[-1],master_ct)
 
 
