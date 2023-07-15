@@ -11,6 +11,6 @@
 			"**/.pyc": true
 		},
 		"explorer.excludeGitIgnore": true,
-		"workbench.colorTheme": "Solarized Light"
+		"workbench.colorTheme": "Visual Studio Dark"
 	}
 }
