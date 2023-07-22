@@ -3,6 +3,7 @@ from common import controls_mod, transforms_mod, utils_mod, attributes_mod
 import importlib as imp
 imp.reload(transforms_mod)
 imp.reload(controls_mod)
+imp.reload(utils_mod)
 
 class spine_module():
     '''
@@ -24,7 +25,7 @@ class spine_module():
         
         # createing all groups and transforms first, connections will be made later
         #create maingrp
-        base_grp = tr.create_transform(Trname='%s_'%basename,make_local=False)
+        base_grp = tr.create_transform(Trname='%s'%basename,make_local=False)
         
         #createNetwork_grps
         network = tr.create_transform(Trname='%s_network'%basename,make_local=False,parent = base_grp)
@@ -39,7 +40,10 @@ class spine_module():
         
         #create controls
         main_ctrl_grp = tr.create_transform(Trname='%s_ctrl'%basename,make_local=False,parent=base_grp,inheritTransform =0)
+        
+        #misc_grp
 
+        misc_grp = tr.create_transform(Trname='%s_misc'%basename,make_local=False,parent=base_grp,inheritTransform =0)
 
         #createskeleton
         skeleton_grp = tr.create_transform(Trname='%s_jnt'%basename, make_local=False,parent = base_grp,inheritTransform =0)
@@ -55,7 +59,7 @@ class spine_module():
        
         if count > 0:
             
-            for i in range(1,count+1):
+            for i in range(1,count):
                 gd_grp =  tr.create_transform(Trname='%s_0%d_guide'%(basename,i), make_local=False)
                 gd = tr.create_transform(Trname = '%s_0%d'%(basename,i), typ = 'guide',make_local=False,parent = gd_grp,guide_scale=shape_scale)
                 gd_grps.append(gd_grp)
@@ -69,14 +73,124 @@ class spine_module():
                 else:
                     gd_grp.translateY.set((i-1)*(2))
                     pm.parent(gd_grp,gds[i-2])
-                
+
+            chest_gd_grp =  tr.create_transform(Trname='chest_guide', make_local=False)
+            chest_gd = tr.create_transform(Trname = 'chest', typ = 'guide',make_local=False,parent = chest_gd_grp,guide_scale=shape_scale)
+            gd_grps.append(chest_gd_grp)
+            gds.append(chest_gd)
+            utz.add_world_mtxs_to_output(output_ntw,chest_gd)
+            utz.object_tag(chest_gd,'guide')
+            chest_gd_grp.translateY.set((count-1)*(2))
+            pm.parent(chest_gd_grp,gds[-2])
             pm.parent(gd_grps[0],guide_grp)       
 
+        #controls
+        ctrl_grps = []
+        tweak_ctrls =[]
+        ctrls = []
+            
+        if count > 0:
+            
+            for i in range(1,count):
+                ctrl_grp =  pm.PyNode(tr.create_transform(Trname='%s_0%d_base_ctrl'%(basename,i), make_local=False))              
+                ctl = cm.create_control(basename='%s_0%d'%(basename,i),curveType = curveType,sub_controls=1,zgrps=0,parent_to=ctrl_grp,control_scale=shape_scale)[1]
+ 
+                tweak_ctrl_grp =  pm.PyNode(tr.create_transform(Trname='%s_0%d_base_tweak'%(basename,i), make_local=False))              
+                tweak_ctl = cm.create_control(basename='%s_0%d_tweak'%(basename,i),curveType = 'Two Arrows',sub_controls=1,zgrps=0,parent_to=tweak_ctrl_grp,control_scale=(shape_scale - .22),color=[.7,1,.2])[1]
+                
+                pm.connectAttr(ctl.worldMatrix[0],tweak_ctrl_grp.offsetParentMatrix)
 
 
+                utz.add_world_mtxs_to_output(output_ntw,ctl)
+                ctrl_grps.append(ctrl_grp)
+                ctrls.append(ctl)
+                tweak_ctrls.append(tweak_ctl)
+                utz.object_tag(ctl,'ctrl')
+
+                
+                if i == 1:
+                    pm.parent(ctrl_grp,main_ctrl_grp)
+                    multMtx = pm.createNode('multMatrix',n = '%s_0%d_multMtx'%(basename,i))
+                    invMtx = pm.createNode('inverseMatrix',n = '%s_0%d_invMtx'%(basename,i))
+                    pm.connectAttr(gds[0].worldMatrix[0],multMtx.matrixIn[0])
+                    pm.connectAttr(input_ntw.parent_guide_mtx,invMtx.inputMatrix)
+                    pm.connectAttr(invMtx.outputMatrix,multMtx.matrixIn[1])
+                    pm.connectAttr(input_ntw.parent_control_mtx,multMtx.matrixIn[2])  
+                    pm.connectAttr(multMtx.matrixSum,ctrl_grp.offsetParentMatrix)
+                    pm.parent(tweak_ctrl_grp,main_ctrl_grp)
+
+                else:
+                    multMtx = pm.createNode('multMatrix',n = '%s_0%d_multMtx'%(basename,i))
+                    pm.connectAttr(gds[i-1].worldMatrix[0],multMtx.matrixIn[0])
+                    pm.connectAttr(gds[i-2].worldInverseMatrix[0],multMtx.matrixIn[1])
+                    pm.connectAttr(ctrls[i-2].worldMatrix[0],multMtx.matrixIn[2])
+                    pm.connectAttr(multMtx.matrixSum,ctrl_grp.offsetParentMatrix)
+
+                    pm.parent(ctrl_grp,main_ctrl_grp)
+                    pm.parent(tweak_ctrl_grp,main_ctrl_grp)
+
+        #chest control
+        chest_ctrl_grp =  pm.PyNode(tr.create_transform(Trname='chest_base', make_local=False))              
+        chest_ctl = cm.create_control(basename='chest',curveType = 'Box',sub_controls=1,zgrps=0,parent_to=chest_ctrl_grp,control_scale=shape_scale-.2,color=[.2,.7,.5])[1]
+        
+        #chest_control connections
+        chest_multMtx = pm.createNode('multMatrix',n = 'chest_multMtx')
+        pm.connectAttr(chest_gd.worldMatrix[0],chest_multMtx.matrixIn[0])
+        pm.connectAttr(gds[-2].worldInverseMatrix[0],chest_multMtx.matrixIn[1])
+        pm.connectAttr(ctrls[-1].worldMatrix[0],chest_multMtx.matrixIn[2])
+        pm.connectAttr(chest_multMtx.matrixSum,chest_ctrl_grp.offsetParentMatrix)
+        
+        utz.add_world_mtxs_to_output(output_ntw,chest_ctl)
+        ctrl_grps.append(chest_ctrl_grp)
+        ctrls.append(chest_ctl)
+        utz.object_tag(chest_ctl,'ctrl')
+
+        pm.parent(chest_ctrl_grp,main_ctrl_grp)
+        
 
 
+        #create joints
+        skl = []
+       
+        if count > 0:
+            
+            for idx,i in enumerate(tweak_ctrls):
+                jnt = tr.create_transform(Trname = '%s_0%d'%(i,idx+1), typ = 'joint',make_local=False,parent = misc_grp)
+                skl.append(jnt)
+                utz.object_tag(jnt,'joint')
+                pm.connectAttr(i.worldMatrix[0],jnt.offsetParentMatrix)
+            #chest_joint
+            ches_jnt = tr.create_transform(Trname = 'chest', typ = 'joint',make_local=False,parent = misc_grp)
+            skl.append(ches_jnt)
+            utz.object_tag(ches_jnt,'joint')
+            pm.connectAttr(chest_ctl.worldMatrix[0],ches_jnt.offsetParentMatrix)               
+        
+        #create_plane
 
+        dist =((gds[-2].worldMatrix.get()).translate-(gds[0].worldMatrix.get()).translate).length()
+
+        v_patches = ((((count-1)-2)*2)+2)
+        nb = pm.nurbsPlane(lr = dist, v = v_patches,ch =0,d =3,ax = [0,0,1],n = basename+'_plane')
+        nbShp = pm.listRelatives(nb, s=1)[0]
+        pm.delete(pm.parentConstraint([gds[0],gds[-2]],nb))
+        pm.makeIdentity(nb,a=1)
+        pm.parent(nb,misc_grp)
+        #skin plane
+        joints = skl[:-1]
+
+        sknPlane = pm.polyPlane(h = dist,w =1,ax = [0,0,1],sw = 1,sh =count -1,ch =0,name=basename+'skn_plane')
+        pm.delete(pm.parentConstraint([gds[0],gds[-2]],sknPlane))
+        newSkn = pm.skinCluster(joints, sknPlane, sm =0, bm = 0, omi = False, dr =0, tsb = True, mi=1)
+        pm.parent(sknPlane,misc_grp)
+        utz.copy_skn(sknPlane[0],nb[0])
+        pm.delete(sknPlane)
+
+        '''
+        planes
+        extra controls
+        out joints
+
+        '''
 
 
 

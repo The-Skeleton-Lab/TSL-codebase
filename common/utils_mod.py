@@ -79,18 +79,18 @@ class utilites():
             elif at_type == 'enum' or 'float' or 'double' or 'bool':
                 print ('%s_%s'%(i,at_type))
 
-def copy_skn(self,src,tgt):
-    srcMesh = src
-    tgtMesh = [tgt]
-    for i in tgtMesh:
-        skn = pm.ls(pm.listHistory(srcMesh),typ = 'skinCluster')[0]
-        jnts = pm.skinCluster(skn,q=1,inf =1)
-        try:
-            tgt_skn = pm.ls(pm.listHistory(i),typ = 'skinCluster')[0]
-            if tgt_skn:
-                pm.skinCluster(tgt_skn,e =1, ub=1)
-        except:
-            pass
-        nskn = pm.skinCluster(jnts,tgtMesh,tsb=1)
-        
-        pm.copySkinWeights(ss = skn, ds = nskn, nm =1, sa = 'closestPoint', ia = ['label', 'oneToOne'])
+    def copy_skn(self,src,tgt):
+        srcMesh = src
+        tgtMesh = [tgt]
+        for i in tgtMesh:
+            skn = pm.ls(pm.listHistory(srcMesh),typ = 'skinCluster')[0]
+            jnts = pm.skinCluster(skn,q=1,inf =1)
+            try:
+                tgt_skn = pm.ls(pm.listHistory(i),typ = 'skinCluster')[0]
+                if tgt_skn:
+                    pm.skinCluster(tgt_skn,e =1, ub=1)
+            except:
+                pass
+            nskn = pm.skinCluster(jnts,tgtMesh,tsb=1)
+            
+            pm.copySkinWeights(ss = skn, ds = nskn, nm =1, sa = 'closestPoint', ia = ['label', 'oneToOne'])

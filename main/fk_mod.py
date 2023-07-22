@@ -86,7 +86,7 @@ class fk_module():
                 utz.add_world_mtxs_to_output(output_ntw,ctl)
                 ctrl_grps.append(ctrl_grp)
                 ctrls.append(ctl)
-                utz.object_tag(ctl,'guide')
+                utz.object_tag(ctl,'ctrl')
                 
                 if i == 1:
                     pm.parent(ctrl_grp,main_ctrl_grp)
@@ -127,3 +127,4 @@ class fk_module():
         
         #returns
         return base_grp,input_ntw,output_ntw
+    
