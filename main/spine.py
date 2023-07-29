@@ -178,33 +178,67 @@ class spine_module():
         #skin plane
         joints = skl[:-1]
 
-        sknPlane = pm.polyPlane(h = dist,w =1,ax = [0,0,1],sw = 1,sh =count -1,ch =0,name=basename+'skn_plane')
+        sknPlane = pm.polyPlane(h = dist,w =1,ax = [0,0,1],sw = 1,sh =v_patches,ch =0,name=basename+'skn_plane')
         pm.delete(pm.parentConstraint([gds[0],gds[-2]],sknPlane))
-        newSkn = pm.skinCluster(joints, sknPlane, sm =0, bm = 0, omi = False, dr =0, tsb = True, mi=1)
+
+        newSkn = pm.skinCluster(joints, sknPlane, sm =0, bm = 0, omi = False, tsb = True, mi=2,wd=0,normalizeWeights = 1,weightDistribution =0,dr =4,rui = 0)
+
         pm.parent(sknPlane,misc_grp)
         utz.copy_skn(sknPlane[0],nb[0])
         pm.delete(sknPlane)
 
-        '''
-        planes
-        extra controls
-        out joints
 
-        '''
+        #sub_controls on plane
+        sub_ctrl_grp = tr.create_transform(Trname='%s_sub'%basename,make_local=False,parent=main_ctrl_grp,inheritTransform =0)
 
+        subctrl_no = (count-1)*2
+        print (sub_controls)
+        sub_ctrls = []
+        uvPin = pm.createNode('uvPin',n = '%s_uvpin'%basename)
+        nbShp.worldSpace[0]>>uvPin.deformedGeometry
+        incriment = 1/(subctrl_no-2)
 
+        v = incriment
 
+        for i in range(0,subctrl_no-3):
+            sub_csize = shape_scale - (shape_scale*50/100)
+            subc = cm.create_control(basename='%s_0%d_sub'%(basename,i),curveType = curveType,sub_controls=1,zgrps=0,parent_to=sub_ctrl_grp,control_scale=sub_csize,color=[.2,.6,.6])
+            sub_ctrls.append(subc[1])
+            if i  == 0:
+                vC = v
+            else:
+                v = v+incriment
+                vC = v
+                
+            uvPin.coordinate[i].set(0.5,vC)
+            uvPin.outputMatrix[i]>>subc[0].offsetParentMatrix
 
+        out_skel = []
+       
+        if count > 0:
+            
+            for idx,i in enumerate(sub_ctrls):
+                jnt = tr.create_transform(Trname = '%s_0%d_out'%(i,idx+1), typ = 'joint',make_local=False,parent = skeleton_grp)
+                out_skel.append(jnt)
+                utz.object_tag(jnt,'joint')
+                pm.connectAttr(i.worldMatrix[0],jnt.offsetParentMatrix)
+            
 
+        #first and last out joints 
 
-
-
-
+        jnts = [skl[0],skl[-1],skl[-2]]
+        for i in jnts:
+            jnt = tr.create_transform(Trname = '%sout'%(i.replace('jnt','')), typ = 'joint',make_local=False,parent = skeleton_grp)
+            out_skel.append(jnt)
+            utz.object_tag(jnt,'joint')
+            pm.connectAttr(i.worldMatrix[0],jnt.offsetParentMatrix)
 
         #adding outputs
         
-        #utz.add_world_mtxs_to_output(output_ntw,ctrls[-1],custom_name='end_ctrl_out')
+        utz.add_world_mtxs_to_output(output_ntw,ctrls[-1],custom_name='end_ctrl_out')
         utz.add_world_mtxs_to_output(output_ntw,gds[-1],custom_name='end_guide_out')
         
+        utz.add_world_mtxs_to_output(output_ntw,ctrls[0],custom_name='start_ctrl_out')
+        utz.add_world_mtxs_to_output(output_ntw,gds[0],custom_name='start_guide_out')        
         #returns
         return base_grp,input_ntw,output_ntw
