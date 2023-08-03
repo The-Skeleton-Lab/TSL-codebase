@@ -5,13 +5,13 @@ imp.reload(transforms_mod)
 imp.reload(controls_mod)
 imp.reload(utils_mod)
 
-class spine_module():
+class cape_mod():
     '''
     TODO write doc
     TODO add tweak
     '''
 
-    def create_spine(self,base_rig_group = None, count = 1,curveType = 'Square', basename = 'spine', sub_controls =1,parent_to =None,pos = None,shape_scale = 1):
+    def create_chain(self,base_rig_group = None, count = 1,curveType = 'Square', basename = 'spine', sub_controls =1,parent_to =None,pos = None,shape_scale = 1):
         """
         TODO write doc
 
@@ -71,17 +71,10 @@ class spine_module():
                     pm.connectAttr(input_ntw.parent_guide_mtx,gd_grp.offsetParentMatrix)
                     
                 else:
-                    gd_grp.translateY.set((i-1)*(2))
+                    gd.translateY.set((i-1)*(2))
                     pm.parent(gd_grp,gds[i-2])
 
-            chest_gd_grp =  tr.create_transform(Trname='chest_guide', make_local=False)
-            chest_gd = tr.create_transform(Trname = 'chest', typ = 'guide',make_local=False,parent = chest_gd_grp,guide_scale=shape_scale)
-            gd_grps.append(chest_gd_grp)
-            gds.append(chest_gd)
-            utz.add_world_mtxs_to_output(output_ntw,chest_gd)
-            utz.object_tag(chest_gd,'guide')
-            chest_gd_grp.translateY.set((count-1)*(2))
-            pm.parent(chest_gd_grp,gds[-2])
+
             pm.parent(gd_grps[0],guide_grp)       
 
         #controls
@@ -129,23 +122,7 @@ class spine_module():
                     pm.parent(ctrl_grp,main_ctrl_grp)
                     pm.parent(tweak_ctrl_grp,main_ctrl_grp)
 
-        #chest control
-        chest_ctrl_grp =  pm.PyNode(tr.create_transform(Trname='chest_base', make_local=False))              
-        chest_ctl = cm.create_control(basename='chest',curveType = 'Box',sub_controls=1,zgrps=0,parent_to=chest_ctrl_grp,control_scale=shape_scale-.2,color=[.2,.7,.5])[1]
-        
-        #chest_control connections
-        chest_multMtx = pm.createNode('multMatrix',n = 'chest_multMtx')
-        pm.connectAttr(chest_gd.worldMatrix[0],chest_multMtx.matrixIn[0])
-        pm.connectAttr(gds[-2].worldInverseMatrix[0],chest_multMtx.matrixIn[1])
-        pm.connectAttr(ctrls[-1].worldMatrix[0],chest_multMtx.matrixIn[2])
-        pm.connectAttr(chest_multMtx.matrixSum,chest_ctrl_grp.offsetParentMatrix)
-        
-        utz.add_world_mtxs_to_output(output_ntw,chest_ctl)
-        ctrl_grps.append(chest_ctrl_grp)
-        ctrls.append(chest_ctl)
-        utz.object_tag(chest_ctl,'ctrl')
-
-        pm.parent(chest_ctrl_grp,main_ctrl_grp)
+   
         
 
         #create joints
@@ -158,27 +135,23 @@ class spine_module():
                 skl.append(jnt)
                 utz.object_tag(jnt,'joint')
                 pm.connectAttr(i.worldMatrix[0],jnt.offsetParentMatrix)
-            #chest_joint
-            ches_jnt = tr.create_transform(Trname = 'chest', typ = 'joint',make_local=False,parent = misc_grp)
-            skl.append(ches_jnt)
-            utz.object_tag(ches_jnt,'joint')
-            pm.connectAttr(chest_ctl.worldMatrix[0],ches_jnt.offsetParentMatrix)               
+
         
         #create_plane
 
-        dist =((gds[-2].worldMatrix.get()).translate-(gds[0].worldMatrix.get()).translate).length()
+        dist =((gds[-1].worldMatrix.get()).translate-(gds[0].worldMatrix.get()).translate).length()
 
-        v_patches = ((((count-1)-2)*2)+2)
+        v_patches = ((((count)-2)*2)+2)
         nb = pm.nurbsPlane(lr = dist, v = v_patches,ch =0,d =3,ax = [0,0,1],n = basename+'_plane')
         nbShp = pm.listRelatives(nb, s=1)[0]
-        pm.delete(pm.parentConstraint([gds[0],gds[-2]],nb))
+        pm.delete(pm.parentConstraint([gds[0],gds[-1]],nb))
         pm.makeIdentity(nb,a=1)
         pm.parent(nb,misc_grp)
         #skin plane
-        joints = skl[:-1]
+        joints = skl
 
         sknPlane = pm.polyPlane(h = dist,w =1,ax = [0,0,1],sw = 1,sh =v_patches,ch =0,name=basename+'skn_plane')
-        pm.delete(pm.parentConstraint([gds[0],gds[-2]],sknPlane))
+        pm.delete(pm.parentConstraint([gds[0],gds[-1]],sknPlane))
 
         newSkn = pm.skinCluster(joints, sknPlane, sm =0, bm = 0, omi = False, tsb = True, mi=2,wd=0,normalizeWeights = 1,weightDistribution =0,dr =4,rui = 0)
 

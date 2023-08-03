@@ -50,10 +50,6 @@ class tf_class(object):
             shape.shape_scale_adjust([trf],guide_scale)
             utz.object_tag(trf,'guide')
             
-            
-            
-
-            
 
         else:
             trf = pm.createNode('transform', n = Trname+'_group')

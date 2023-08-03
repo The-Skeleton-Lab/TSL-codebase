@@ -94,3 +94,15 @@ class utilites():
             nskn = pm.skinCluster(jnts,tgtMesh,tsb=1)
             
             pm.copySkinWeights(ss = skn, ds = nskn, nm =1, sa = 'closestPoint', ia = ['label', 'oneToOne'])
+
+    def curve_from_transform(trz):
+        points = []
+        trs = trz
+        for i in trs:
+            mtx = i.worldMatrix.get()
+            tr = mtx.translate.get()
+            points.append(tr)
+            
+        crv = pm.curve(d=3,p=points)
+        pm.parent(trs,w=1)
+        pm.skinCluster(trs,crv,tsb=1)
