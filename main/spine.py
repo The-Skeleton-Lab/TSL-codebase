@@ -191,19 +191,23 @@ class spine_module():
         sub_ctrl_grp = tr.create_transform(Trname='%s_sub'%basename,make_local=False,parent=main_ctrl_grp,inheritTransform =0)
 
         subctrl_no = (count-1)*2
-        print (sub_controls)
+        
         sub_ctrls = []
+        sub_ctrls_grp = []
         uvPin = pm.createNode('uvPin',n = '%s_uvpin'%basename)
         nbShp.worldSpace[0]>>uvPin.deformedGeometry
         incriment = 1/(subctrl_no-2)
 
         v = incriment
 
-        for i in range(0,subctrl_no-3):
+        for i in range(1,subctrl_no-2):
+            print(i)
+            
             sub_csize = shape_scale - (shape_scale*50/100)
             subc = cm.create_control(basename='%s_0%d_sub'%(basename,i),curveType = curveType,sub_controls=1,zgrps=0,parent_to=sub_ctrl_grp,control_scale=sub_csize,color=[.2,.6,.6])
             sub_ctrls.append(subc[1])
-            if i  == 0:
+            sub_ctrls_grp.append(subc[0])
+            if i  == 1:
                 vC = v
             else:
                 v = v+incriment
@@ -232,10 +236,49 @@ class spine_module():
             utz.object_tag(jnt,'joint')
             pm.connectAttr(i.worldMatrix[0],jnt.offsetParentMatrix)
 
-        #setting and spinerotate
-        
-        
-        
+
+        # Loop through the main controllers
+        ctrl_pairs = []
+        for i in range(len(tweak_ctrls) - 1):
+            ctrl_pairs.append([tweak_ctrls[i], tweak_ctrls[i + 1]])
+            #print ((tweak_ctrls[i], tweak_ctrls[i + 1]))
+
+        print(ctrl_pairs[0][0])
+
+
+        even_index_elements = []
+        odd_index_elements = []
+
+        for index, element in enumerate(sub_ctrls_grp):
+            if index % 2 == 0:
+                odd_index_elements.append(element)
+            else:
+                even_index_elements.append(element)
+
+        trimmed_tweak_list = tweak_ctrls[1:-1]
+        for idx,i in enumerate(even_index_elements):
+            dcm = pm.createNode('decomposeMatrix',n = trimmed_tweak_list[idx]+'_dcm')
+            print(trimmed_tweak_list[idx],i)
+            trimmed_tweak_list[idx].worldMatrix[0]>>dcm.inputMatrix
+            dcm.outputScaleX>>i.scaleX
+            dcm.outputScaleY>>i.scaleY
+            dcm.outputScaleZ>>i.scaleZ
+
+        for idx,i in enumerate(odd_index_elements):
+            print(str(ctrl_pairs[idx][1]))
+            dcm1 = pm.createNode('decomposeMatrix',n = str(ctrl_pairs[idx][0])+'_dcm')
+            dcm2 = pm.createNode('decomposeMatrix',n = str(ctrl_pairs[idx][1])+'_dcm')
+            ctrl_pairs[idx][0].worldMatrix[0]>>dcm1.inputMatrix
+            ctrl_pairs[idx][1].worldMatrix[0]>>dcm2.inputMatrix
+            pma = pm.createNode('plusMinusAverage',n = i+'_pma')
+            dcm1.outputScaleX>>pma.input1D[0]
+            dcm2.outputScaleX>>pma.input1D[1]
+            pma.operation.set(3)
+            pma.output1D>>i.scaleX
+            pma.output1D>>i.scaleY
+            pma.output1D>>i.scaleZ
+
+
         #adding outputs
         
         utz.add_world_mtxs_to_output(output_ntw,ctrls[-1],custom_name='end_ctrl_out')

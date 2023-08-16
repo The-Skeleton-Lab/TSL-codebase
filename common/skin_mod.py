@@ -183,11 +183,11 @@ class skin_utils(gatherData):
         if skinClusterDetails:
             sknfilePath = filePath.split('.json')[0]+'_sknInfo.json'
             
-            #self.writeJson(dataToWrite = skinClusterDetails,fileName = sknfilePath)
+            self.writeJson(dataToWrite = skinClusterDetails,fileName = sknfilePath)
                 
         if vtxDict:
-            pass
-            #self.writeJson(dataToWrite = vtxDict,fileName = filePath)
+            
+            self.writeJson(dataToWrite = vtxDict,fileName = filePath)
         
         return geoData
             
