@@ -5,36 +5,53 @@ import common.utils_mod as ut
 import common.transforms_mod as trs
 
 
-class controls():
-    '''
+class controls:
+    """
     control class for making and editing controls
-    Examples - 
+    Examples -
     import controls as c
     cc = c.controls()
-    #creating control - 
+    #creating control -
     cc.create_control(basename = 'Krishna',zgrps =2,curveType= 'Sphere',sub_controls =4)
     #scaling control just need any group from the module -
     cc.scale_control_module(obj = 'Krishna_01_zero_group',val = .8)
-    '''
+    """
 
-    def create_control(self, curveType='Square', basename='temp', zgrps=1, pos=None, sub_controls=1, cons_from=None, cons_to=None, cons_typ_mtx=True, inheritTr=1, color=[.4, .5, .7], line_thickness=1.5, create_joint=False, jnt_grp=True, parent_to=None, control_scale=1):
-        '''
+    def create_control(
+        self,
+        curveType="Square",
+        basename="temp",
+        zgrps=1,
+        pos=None,
+        sub_controls=1,
+        cons_from=None,
+        cons_to=None,
+        cons_typ_mtx=True,
+        inheritTr=1,
+        color=[0.4, 0.5, 0.7],
+        line_thickness=1.5,
+        create_joint=False,
+        jnt_grp=True,
+        parent_to=None,
+        control_scale=1,
+    ):
+        """
         #
         #
         #
-        Avilable 
-        curveType - ['Circle', 'Half Circle', 'Square', 'Triangle', 'Sphere', 'Half Sphere','Box', 'Pyramid', 'Diamond', 'Circle Pin','Square Pin','Curved Four Arrows', 
+        Avilable
+        curveType - ['Circle', 'Half Circle', 'Square', 'Triangle', 'Sphere', 'Half Sphere','Box', 'Pyramid', 'Diamond', 'Circle Pin','Square Pin','Curved Four Arrows',
                 'Curved Four Arrows Thin', 'Two Arrows', 'Two Arrows Thin', 'Curved Two Arrows', 'Curved Two Arrows Thin', 'One Arrow', 'Sphere Pin',
                 'Circle Dumbbell', 'Square Dumbbell', 'Sphere Dumbbell', 'Cross', 'Cross Thin', 'Locator', 'Four Arrows', 'Four Arrows Thin',
                 'One Arrow Thin','Circle One Arrow',  'Circle Two Arrows', 'Circle Three Arrows', 'Circle Four Arrows', 'Sphere Four Arrows', 'Gear']
         basename - name for the controller and groups
         zgrps - number of zero groups
-        pos - takes a matrix(pymel matrix prefered) and moves the first zero group to given position 
+        pos - takes a matrix(pymel matrix prefered) and moves the first zero group to given position
         sub_controls - takes number of sub controls
-        cons_from - parent object for constrainting 
+        cons_from - parent object for constrainting
         cons_to - object to send the output constraint from control
         cons_typ_mtx - if true the constraint will be matrix else parent & scale will be used
-        inheritTr -  inherit transform for the topmost zero/control group 
+        inheritTr -  inherit transform for the topmost zero/control group
         color - takes rgb default is ['.4','.5','.7']
                 - blue .06, .5, .4
                 - red  .4 , .07, .1
@@ -46,23 +63,23 @@ class controls():
         #
         #
         #
-        '''
+        """
         baseMtx = pm.datatypes.Matrix()
         utz = ut.utilites()
         # create control and base group
         shape = BSControlsUtils()
 
         ctl = pm.PyNode(shape.bsDrawCurve(
-            curve=curveType, name=basename+'_ctrl'))
+            curve=curveType, name=basename + "_ctrl"))
         ctl.v.setLocked(1)
         ctl.v.setKeyable(0)
 
-        utz.object_tag(ctl, 'control')
+        utz.object_tag(ctl, "control")
 
-        cgrp = pm.createNode('transform', name=basename+'_ctrl_group')
+        cgrp = pm.createNode("transform", name=basename + "_ctrl_group")
         if jnt_grp:
-
-            jnt_grp = pm.createNode('transform', name=basename+'_ctrl_jnt_grp')
+            jnt_grp = pm.createNode(
+                "transform", name=basename + "_ctrl_jnt_grp")
             utz.object_tag(jnt_grp)
 
             jnt_grp.v.set(0)
@@ -71,23 +88,22 @@ class controls():
 
             pm.parent(jnt_grp, cgrp)
 
-        utz.object_tag(cgrp, 'control_grp')
+        utz.object_tag(cgrp, "control_grp")
         pm.parent(ctl, cgrp)
         last_output_node = None
         # extra group creation
         extra_grps = []
         if zgrps > 0:
-            for i in range(1, zgrps+1):
-
+            for i in range(1, zgrps + 1):
                 tr_node = pm.createNode(
-                    'transform', name='%s_0%d_zero_group' % (basename, i))
+                    "transform", name="%s_0%d_zero_group" % (basename, i)
+                )
                 extra_grps.append(tr_node)
                 utz.object_tag(tr_node)
                 if i == 1:
                     pass
                 else:
-
-                    pm.parent(tr_node, extra_grps[i-2])
+                    pm.parent(tr_node, extra_grps[i - 2])
                 # extra_grps.append(tr_node)
             pm.parent(cgrp, extra_grps[-1])
         elif zgrps == 0:
@@ -112,18 +128,21 @@ class controls():
                     extra_grps[0].setScale(sc)
                 except ValueError:
                     print(
-                        "Pos attribute is not a matrix, mtx example = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]")
+                        "Pos attribute is not a matrix, mtx example = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]"
+                    )
         # sub_controls
         sub_ctrls = []
-        pm.addAttr(ctl, ln='sub_vis', at='bool', dv=0)
+        pm.addAttr(ctl, ln="sub_vis", at="bool", dv=0)
         if sub_controls > 0:
-
-            for i in range(1, sub_controls+1):
-                tr_node = pm.PyNode(shape.bsDrawCurve(
-                    curve=curveType, name='%s_0%d_sub_ctrl' % (basename, i)))
+            for i in range(1, sub_controls + 1):
+                tr_node = pm.PyNode(
+                    shape.bsDrawCurve(
+                        curve=curveType, name="%s_0%d_sub_ctrl" % (basename, i)
+                    )
+                )
                 sub_ctrls.append(tr_node)
-                utz.object_tag(tr_node, 'control')
-                shape.shape_scale_adjust([tr_node], 1-(i/10))
+                utz.object_tag(tr_node, "control")
+                shape.shape_scale_adjust([tr_node], 1 - (i / 10))
                 shapes = pm.listRelatives(tr_node, s=1)
                 cPy = pm.PyNode(ctl)
                 cPy.sub_vis >> tr_node.v
@@ -133,15 +152,14 @@ class controls():
                 for sh in shapes:
                     sh.overrideEnabled.set(1)
                     sh.overrideRGBColors.set(1)
-                    sh.overrideColorR.set(random.uniform(.3, .7))
-                    sh.overrideColorG.set(random.uniform(.3, .7))
-                    sh.overrideColorB.set(random.uniform(.3, .7))
+                    sh.overrideColorR.set(random.uniform(0.3, 0.7))
+                    sh.overrideColorG.set(random.uniform(0.3, 0.7))
+                    sh.overrideColorB.set(random.uniform(0.3, 0.7))
                     sh.lineWidth.set(1.1)
                 if i == 1:
                     pass
                 else:
-
-                    pm.parent(tr_node, sub_ctrls[i-2])
+                    pm.parent(tr_node, sub_ctrls[i - 2])
 
             pm.parent(sub_ctrls[0], ctl)
             last_output_node = sub_ctrls[0]
@@ -153,10 +171,11 @@ class controls():
                 parent = pm.PyNode(cons_from)
                 child = extra_grps[0]
                 cons_mtx = pm.createNode(
-                    'multMatrix', n='%s_TO_%s_mtx_con' % (str(parent), str(child)))
+                    "multMatrix", n="%s_TO_%s_mtx_con" % (str(parent), str(child))
+                )
                 pMtx = parent.worldMatrix.get()
                 cMtx = child.worldMatrix.get()
-                mm = pMtx.inverse()*cMtx
+                mm = pMtx.inverse() * cMtx
                 cons_mtx.matrixIn[0].set(mm)
                 parent.worldMatrix >> cons_mtx.matrixIn[1]
                 cons_mtx.matrixSum >> child.offsetParentMatrix
@@ -176,10 +195,11 @@ class controls():
                 for ch in child:
                     chpy = pm.PyNode(ch)
                     cons_mtx = pm.createNode(
-                        'multMatrix', n='%s_TO_%s_mtx_con' % (str(parent), str(chpy)))
+                        "multMatrix", n="%s_TO_%s_mtx_con" % (str(parent), str(chpy))
+                    )
                     pMtx = parent.worldMatrix.get()
                     cMtx = chpy.worldMatrix.get()
-                    mm = pMtx.inverse()*cMtx
+                    mm = pMtx.inverse() * cMtx
                     cons_mtx.matrixIn[0].set(mm)
                     parent.worldMatrix >> cons_mtx.matrixIn[1]
                     cons_mtx.matrixSum >> chpy.offsetParentMatrix
@@ -204,37 +224,42 @@ class controls():
             i.lineWidth.set(line_thickness)
 
         # ctl_output
-        ctl_output = pm.createNode('transform', n=basename+'_ctrl_output')
+        ctl_output = pm.createNode("transform", n=basename + "_ctrl_output")
         utz.object_tag(ctl_output)
         ctl_output.v.set(0)
-        last_control = pm.listRelatives(ctl, ad=1, typ='transform')[0]
+        last_control = pm.listRelatives(ctl, ad=1, typ="transform")[0]
         pm.parent(ctl_output, last_control)
 
         # inherit Transform for first group of the control
         extra_grps[0].inheritsTransform.set(inheritTr)
         # crerate control message attr for shape scales
-        all_controls = [pm.PyNode(ctl)]+sub_ctrls
-        pm.addAttr(cgrp, at='compound', ln='controls',
-                   multi=1, numberOfChildren=len(all_controls))
+        all_controls = [pm.PyNode(ctl)] + sub_ctrls
+        pm.addAttr(
+            cgrp,
+            at="compound",
+            ln="controls",
+            multi=1,
+            numberOfChildren=len(all_controls),
+        )
         # creating attributes and connecting them differently because of some reason they dont work in the same loop
         for i in all_controls:
-            if '|' in str(i):
-                i2 = i.split('|')[-1]
+            if "|" in str(i):
+                i2 = i.split("|")[-1]
             else:
                 i2 = str(i)
-            pm.addAttr(cgrp, ln=i2, at='message', parent='controls')
+            pm.addAttr(cgrp, ln=i2, at="message", parent="controls")
         # connect
         for i in all_controls:
-            if '|' in str(i):
-                i2 = i.split('|')[-1]
+            if "|" in str(i):
+                i2 = i.split("|")[-1]
             else:
                 i2 = str(i)
-            pm.connectAttr(i.message, '%s.controls[0].%s' % (cgrp, i2))
+            pm.connectAttr(i.message, "%s.controls[0].%s" % (cgrp, i2))
 
         pm.select(cl=1)
         if create_joint:
             t = trs.tf_class()
-            jnt = t.create_transform(Trname=basename+'_ctrl', typ='joint')
+            jnt = t.create_transform(Trname=basename + "_ctrl", typ="joint")
             print(jnt)
             pm.parent(jnt, jnt_grp)
             ctl_output.worldMatrix[0] >> jnt.offsetParentMatrix
@@ -253,15 +278,15 @@ class controls():
         return cgrp, ctl_output, extra_grps[0]
 
     def scale_control_module(self, obj, val=1):
-        '''
+        """
 
         cc.scale_control_module(obj = 'Krishna_01_zero_group',val = .8)
-        '''
-        children = pm.listRelatives(obj, ad=1, typ='transform')
+        """
+        children = pm.listRelatives(obj, ad=1, typ="transform")
         ctrl_grp = None
         shape = BSControlsUtils()
         for i in children:
-            if pm.getAttr(i.obj_type) == 'control_grp':
+            if pm.getAttr(i.obj_type) == "control_grp":
                 ctrl_grp = i
         if ctrl_grp:
             connections = pm.listConnections(ctrl_grp.controls)
@@ -269,36 +294,36 @@ class controls():
                 shape.shape_scale_adjust([cn], val)
 
 
-class BSControlsUtils():
+class BSControlsUtils:
     # Function to draw nurbs curves from dictionary data and user input.
-    def bsDrawCurve(self, curve='Circle', thickness=1, name='temp_ctrl'):
+    def bsDrawCurve(self, curve="Circle", thickness=1, name="temp_ctrl"):
         # Exception for Circle shape.
-        if curve == 'Circle':
+        if curve == "Circle":
             crv = cmds.circle(d=3, r=2, nr=[0, 1, 0], ch=False)
         else:
             crv = cmds.curve(d=1, p=BSControlsData.cvTuples[curve])
         # Exception for adding an additional shape node to the Gear curve.
-        if curve == 'Gear':
+        if curve == "Gear":
             circle = cmds.circle(r=0.9, nr=[0, 1, 0])
             circleShape = cmds.listRelatives(circle, s=True)
-            circleShape = cmds.rename(circleShape, crv + 'CircleShape')
+            circleShape = cmds.rename(circleShape, crv + "CircleShape")
             cmds.parent(circleShape, crv, add=True, s=True)
             cmds.delete(circle)
         # Only adjusting the lineWidth attribute only if a value greater than 1.0 is input.
         if thickness > 1.0:
             crvShape = cmds.listRelatives(crv, s=True)
             for c in crvShape:
-                cmds.setAttr('%s.lineWidth' % (c), thickness)
+                cmds.setAttr("%s.lineWidth" % (c), thickness)
         else:
             pass
         v = cmds.rename(crv, name)
         return v
 
     def shape_scale_adjust(self, ctrl=[], value=1.1):
-        '''
-        ctrl takes transforms as a list 
+        """
+        ctrl takes transforms as a list
         value when above 1 increases when below 1 decreases the size of the nurb curve
-        '''
+        """
         v = value
         ctrl_base = ctrl
         for c in ctrl_base:
@@ -306,7 +331,7 @@ class BSControlsUtils():
             TmpTrans = []
             newShp = []
             for i in shapes:
-                tmtr = pm.createNode('transform', n=('temp'+i))
+                tmtr = pm.createNode("transform", n=("temp" + i))
                 pm.parent(i, tmtr, r=True, s=True)
                 # nshape = pm.duplicate(i,n=('temp'+i))
                 pm.xform(tmtr, s=(v, v, v))
@@ -316,33 +341,66 @@ class BSControlsUtils():
             pm.select(cl=True)
             for i in newShp:
                 pm.select(i)
-                pm.rename(i, c+'_Shape_00')
+                pm.rename(i, c + "_Shape_00")
                 pm.select(c, add=True)
                 pm.parent(r=True, s=True)
                 pm.delete(TmpTrans)
                 pm.select(c)
 
 
-class BSControlsData():
-    '''
+class BSControlsData:
+    """
     If you wish to add more control curve options to the menu, simply add a new name into the "controlNames" list and a corresponding key in the dictionary
-    with the list of tuples for CV coordinates. To easily get the list of tuples for a controller, select all of the CVs of a linear nurbs curve and run 
-    the following script in a Python tab in the script editor. Then, select "tupleList" in the script editor and press Ctrl + Enter. You can copy paste 
+    with the list of tuples for CV coordinates. To easily get the list of tuples for a controller, select all of the CVs of a linear nurbs curve and run
+    the following script in a Python tab in the script editor. Then, select "tupleList" in the script editor and press Ctrl + Enter. You can copy paste
     the printout into a new dictionary key at the bottom of the list.
     sel = cmds.ls(sl=True)
     trans = cmds.xform(sel, q=True, t=True)
     list = [trans[i:i+3] for i in range(0, len(trans), 3)]
     tupleList = [tuple(i) for i in list]
-    '''
+    """
+
     # List of all control curve names.
-    controlNames = ['Circle', 'Half Circle', 'Square', 'Triangle', 'Sphere', 'Half Sphere', 'Box', 'Pyramid', 'Diamond', 'Circle Pin', 'Square Pin',
-                    'Sphere Pin', 'Circle Dumbbell', 'Square Dumbbell', 'Sphere Dumbbell', 'Cross', 'Cross Thin', 'Locator', 'Four Arrows', 'Four Arrows Thin',
-                    'Curved Four Arrows', 'Curved Four Arrows Thin', 'Two Arrows', 'Two Arrows Thin', 'Curved Two Arrows', 'Curved Two Arrows Thin', 'One Arrow',
-                    'One Arrow Thin', 'Circle One Arrow',  'Circle Two Arrows', 'Circle Three Arrows', 'Circle Four Arrows', 'Sphere Four Arrows', 'Gear']
+    controlNames = [
+        "Circle",
+        "Half Circle",
+        "Square",
+        "Triangle",
+        "Sphere",
+        "Half Sphere",
+        "Box",
+        "Pyramid",
+        "Diamond",
+        "Circle Pin",
+        "Square Pin",
+        "Sphere Pin",
+        "Circle Dumbbell",
+        "Square Dumbbell",
+        "Sphere Dumbbell",
+        "Cross",
+        "Cross Thin",
+        "Locator",
+        "Four Arrows",
+        "Four Arrows Thin",
+        "Curved Four Arrows",
+        "Curved Four Arrows Thin",
+        "Two Arrows",
+        "Two Arrows Thin",
+        "Curved Two Arrows",
+        "Curved Two Arrows Thin",
+        "One Arrow",
+        "One Arrow Thin",
+        "Circle One Arrow",
+        "Circle Two Arrows",
+        "Circle Three Arrows",
+        "Circle Four Arrows",
+        "Sphere Four Arrows",
+        "Gear",
+    ]
     # Control curve CV tuples dictionary.
     cvTuples = {}
     # Control curve CV dictionary keys.
-    cvTuples['Half Circle'] = [
+    cvTuples["Half Circle"] = [
         (1.2246467991473532e-16, 1.2246467991473532e-16, -2.0),
         (-0.3901806440322564, 1.2011155542966555e-16, -1.9615705608064609),
         (-0.7653668647301793, 1.1314261122877003e-16, -1.8477590650225735),
@@ -363,22 +421,22 @@ class BSControlsData():
         (1.1111404660392035, 1.0182565992946014e-16, -1.6629392246050883),
         (0.7653668647301792, 1.1314261122876988e-16, -1.847759065022571),
         (0.3901806440322567, 1.2011155542966538e-16, -1.9615705608064582),
-        (7.330873434585712e-16, 1.2246467991473515e-16, -1.9999999999999973)
+        (7.330873434585712e-16, 1.2246467991473515e-16, -1.9999999999999973),
     ]
-    cvTuples['Square'] = [
+    cvTuples["Square"] = [
         (-2.001501540839854, 0.0, -2.001501540839854),
         (-2.001501540839854, 0.0, 2.001501540839854),
         (2.001501540839854, 0.0, 2.001501540839854),
         (2.001501540839854, 0.0, -2.001501540839854),
-        (-2.001501540839854, 0.0, -2.001501540839854)
+        (-2.001501540839854, 0.0, -2.001501540839854),
     ]
-    cvTuples['Triangle'] = [
+    cvTuples["Triangle"] = [
         (-2.001501540839854, 0.0, 2.001501540839854),
         (0.0, 0.0, -2.001501540839854),
         (2.001501540839854, 0.0, 2.001501540839854),
-        (-2.001501540839854, 0.0, 2.001501540839854)
+        (-2.001501540839854, 0.0, 2.001501540839854),
     ]
-    cvTuples['Sphere'] = [
+    cvTuples["Sphere"] = [
         (0.0, 2.001501540839854, 0.0),
         (-9.331221744602883e-09, 1.9768597796103284, 0.3131038753308959),
         (-1.843267699523828e-08, 1.903541130260558, 0.6184980664640812),
@@ -489,9 +547,9 @@ class BSControlsData():
         (-1.6192492544297676, 0.0, -1.176453429421351),
         (-1.1764535487201393, 0.0, -1.619249373728556),
         (-0.6184983050616579, 0.0, -1.9035419653520766),
-        (0.0, 0.0, -2.001502495230161)
+        (0.0, 0.0, -2.001502495230161),
     ]
-    cvTuples['Half Sphere'] = [
+    cvTuples["Half Sphere"] = [
         (-5.964939417957824e-08, 0.0, 2.001501779437431),
         (0.6184979471652929, 0.0, 1.9035412495593464),
         (1.176453071524986, 0.0, 1.6192488965334026),
@@ -557,9 +615,9 @@ class BSControlsData():
         (1.7833509413547823, 0.9086627233988221, 0.0),
         (1.903541130260558, 0.6184979471652929, 0.0),
         (1.9768597796103284, 0.3131036367333192, 0.0),
-        (2.001501540839854, 0.0, 0.0)
+        (2.001501540839854, 0.0, 0.0),
     ]
-    cvTuples['Box'] = [
+    cvTuples["Box"] = [
         (-2.001501540839854, 2.001501540839854, 2.001501540839854),
         (-2.001501540839854, -2.001501540839854, 2.001501540839854),
         (2.001501540839854, -2.001501540839854, 2.001501540839854),
@@ -576,9 +634,9 @@ class BSControlsData():
         (-2.001501540839854, 2.001501540839854, -2.001501540839854),
         (2.001501540839854, 2.001501540839854, -2.001501540839854),
         (2.001501540839854, -2.001501540839854, -2.001501540839854),
-        (-2.001501540839854, -2.001501540839854, -2.001501540839854)
+        (-2.001501540839854, -2.001501540839854, -2.001501540839854),
     ]
-    cvTuples['Pyramid'] = [
+    cvTuples["Pyramid"] = [
         (0.0, 2.490540839504063, 0.0),
         (-1.6603603287505906, 2.033354952212225e-16, -1.6603603287505906),
         (-1.6603603287505906, -2.033354952212225e-16, 1.6603603287505906),
@@ -589,9 +647,9 @@ class BSControlsData():
         (-1.6603603287505906, -2.033354952212225e-16, 1.6603603287505906),
         (1.6603603287505906, -2.033354952212225e-16, 1.6603603287505906),
         (1.6603603287505906, 2.033354952212225e-16, -1.6603603287505906),
-        (-1.6603603287505906, 2.033354952212225e-16, -1.6603603287505906)
+        (-1.6603603287505906, 2.033354952212225e-16, -1.6603603287505906),
     ]
-    cvTuples['Diamond'] = [
+    cvTuples["Diamond"] = [
         (0.0, -2.490540839504063, -3.05003297768552e-16),
         (-1.6603603287505906, 2.033354952212225e-16, -1.6603603287505906),
         (0.0, 2.490540839504063, 0.0),
@@ -604,9 +662,9 @@ class BSControlsData():
         (1.6603603287505906, 2.033354952212225e-16, -1.6603603287505906),
         (-1.6603603287505906, 0.0, -1.6603603287505906),
         (-1.6603603287505906, 0.0, 1.6603603287505906),
-        (0.0, -2.490540839504063, -3.05003297768552e-16)
+        (0.0, -2.490540839504063, -3.05003297768552e-16),
     ]
-    cvTuples['Circle Pin'] = [
+    cvTuples["Circle Pin"] = [
         (0.0, 3.6012403205778734, 0.0),
         (-0.18778610161340414, 3.616019375585509, 0.0),
         (-0.3709482346983487, 3.659992707756567, 0.0),
@@ -648,18 +706,18 @@ class BSControlsData():
         (0.370948163148132, 3.659992707756567, 0.0),
         (0.1877860479507416, 3.616019375585509, 0.0),
         (0.0, 3.6012403205778734, 0.0),
-        (0.0, 0.0, 0.0)
+        (0.0, 0.0, 0.0),
     ]
-    cvTuples['Square Pin'] = [
+    cvTuples["Square Pin"] = [
         (0.0, 3.602702773511737, 0.0),
         (1.2009009245039124, 3.602702773511737, 0.0),
         (1.2009009245039124, 6.004504622519563, 0.0),
         (-1.2009009245039124, 6.004504622519563, 0.0),
         (-1.2009009245039124, 3.602702773511737, 0.0),
         (0.0, 3.602702773511737, 0.0),
-        (0.0, 0.0, 0.0)
+        (0.0, 0.0, 0.0),
     ]
-    cvTuples['Sphere Pin'] = [
+    cvTuples["Sphere Pin"] = [
         (0.0, 0.0, 0.0),
         (0.0, 3.602702773511737, 0.0),
         (0.18786230730371928, 3.6174878302494524, 0.0),
@@ -771,9 +829,9 @@ class BSControlsData():
         (0.7058722723906297, 4.80360369801565, -0.9715498389749526),
         (0.9715499105542255, 4.80360369801565, -0.7058722723906297),
         (1.142125393949065, 4.80360369801565, -0.3710990188266313),
-        (1.2009009245039124, 4.80360369801565, 0.0)
+        (1.2009009245039124, 4.80360369801565, 0.0),
     ]
-    cvTuples['Circle Dumbbell'] = [
+    cvTuples["Circle Dumbbell"] = [
         (0.0, 2.105670141066572, 0.0),
         (-0.18722201579424713, 2.120404734416812, 0.0),
         (-0.3698339685099314, 2.164246084748495, 0.0),
@@ -855,9 +913,9 @@ class BSControlsData():
         (-0.5433394719014477, -2.2361142994293948, 0.0),
         (-0.3698339685099314, -2.164246084748495, 0.0),
         (-0.18722201579424713, -2.120404734416812, 0.0),
-        (0.0, -2.105670141066572, 0.0)
+        (0.0, -2.105670141066572, 0.0),
     ]
-    cvTuples['Square Dumbbell'] = [
+    cvTuples["Square Dumbbell"] = [
         (0.0, 2.1015767610403926, 0.0),
         (-1.2009009722234278, 2.1015767610403926, 0.0),
         (-1.2009009722234278, 4.5033784668896715, 0.0),
@@ -869,9 +927,9 @@ class BSControlsData():
         (1.2009009722234278, -4.5033784668896715, 0.0),
         (-1.2009009722234278, -4.5033784668896715, 0.0),
         (-1.2009009722234278, -2.1015767610403926, 0.0),
-        (0.0, -2.1015767610403926, 0.0)
+        (0.0, -2.1015767610403926, 0.0),
     ]
-    cvTuples['Sphere Dumbbell'] = [
+    cvTuples["Sphere Dumbbell"] = [
         (0.0, 2.105579712584996, 0.0),
         (-0.1872361527006677, 2.120315498923119, 0.0),
         (-0.36986188442640744, 2.164160189620876, 0.0),
@@ -1072,9 +1130,9 @@ class BSControlsData():
         (-0.5433394719014477, -2.2361142994293948, 0.0),
         (-0.3698339685099314, -2.164246084748495, 0.0),
         (-0.18722201579424713, -2.120404734416812, 0.0),
-        (0.0, -2.105670141066572, 0.0)
+        (0.0, -2.105670141066572, 0.0),
     ]
-    cvTuples['Cross'] = [
+    cvTuples["Cross"] = [
         (-1.000750770419927, 0.0, -2.001501540839854),
         (1.000750770419927, 0.0, -2.001501540839854),
         (1.000750770419927, 0.0, -1.000750770419927),
@@ -1087,9 +1145,9 @@ class BSControlsData():
         (-2.001501540839854, 0.0, 1.000750770419927),
         (-2.001501540839854, 0.0, -1.000750770419927),
         (-1.000750770419927, 0.0, -1.000750770419927),
-        (-1.000750770419927, 0.0, -2.001501540839854)
+        (-1.000750770419927, 0.0, -2.001501540839854),
     ]
-    cvTuples['Cross Thin'] = [
+    cvTuples["Cross Thin"] = [
         (-0.40030030816797085, 0.0, -2.001501540839854),
         (-0.40030030816797085, 0.0, -0.40030030816797085),
         (-2.001501540839854, 0.0, -0.40030030816797085),
@@ -1102,9 +1160,9 @@ class BSControlsData():
         (2.001501540839854, 0.0, -0.40030030816797085),
         (0.40030030816797085, 0.0, -0.40030030816797085),
         (0.40030030816797085, 0.0, -2.001501540839854),
-        (-0.40030030816797085, 0.0, -2.001501540839854)
+        (-0.40030030816797085, 0.0, -2.001501540839854),
     ]
-    cvTuples['Locator'] = [
+    cvTuples["Locator"] = [
         (0.0, 0.5001501540839854, 0.0),
         (0.0, -0.5001501540839854, 0.0),
         (0.0, 0.0, 0.0),
@@ -1112,9 +1170,9 @@ class BSControlsData():
         (0.0, 0.0, 2.001501540839854),
         (0.0, 0.0, 0.0),
         (2.001501540839854, 0.0, 0.0),
-        (-2.001501540839854, 0.0, 0.0)
+        (-2.001501540839854, 0.0, 0.0),
     ]
-    cvTuples['Four Arrows'] = [
+    cvTuples["Four Arrows"] = [
         (0.0, 0.0, -2.001501540839854),
         (0.8006006163359417, 0.0, -1.2009009245039126),
         (0.40030030816797085, 0.0, -1.2009009245039126),
@@ -1139,9 +1197,9 @@ class BSControlsData():
         (-0.40030030816797085, 0.0, -0.40030030816797085),
         (-0.40030030816797085, 0.0, -1.2009009245039126),
         (-0.8006006163359417, 0.0, -1.2009009245039126),
-        (0.0, 0.0, -2.001501540839854)
+        (0.0, 0.0, -2.001501540839854),
     ]
-    cvTuples['Four Arrows Thin'] = [
+    cvTuples["Four Arrows Thin"] = [
         (0.0, 0.0, -1.9995000392990145),
         (0.6665000130996714, 0.0, -1.3330000261993429),
         (0.16662500327491786, 0.0, -1.3330000261993429),
@@ -1166,9 +1224,9 @@ class BSControlsData():
         (-0.16662500327491786, 0.0, -0.16662500327491786),
         (-0.16662500327491786, 0.0, -1.3330000261993429),
         (-0.6665000130996714, 0.0, -1.3330000261993429),
-        (0.0, 0.0, -1.9995000392990145)
+        (0.0, 0.0, -1.9995000392990145),
     ]
-    cvTuples['Curved Four Arrows'] = [
+    cvTuples["Curved Four Arrows"] = [
         (1.9917258826883961, -0.3993344826837887, 0.0),
         (1.3330000261993429, 0.16673135099852496, 0.8886666841328953),
         (1.3330000261993429, 0.16673134580034765, 0.44433334206644765),
@@ -1201,9 +1259,9 @@ class BSControlsData():
         (0.8886666841328953, 0.33548407942743624, -0.44433334206644765),
         (1.3330000261993429, 0.16673134580034765, -0.44433334206644765),
         (1.3330000261993429, 0.16673135099852496, -0.8886666841328953),
-        (1.9917258826883961, -0.3993344826837887, 0.0)
+        (1.9917258826883961, -0.3993344826837887, 0.0),
     ]
-    cvTuples['Curved Four Arrows Thin'] = [
+    cvTuples["Curved Four Arrows Thin"] = [
         (0.0, -0.5758674561293435, -2.0128282558399926),
         (0.7623196350268492, -0.09125630012069194, -1.5246392700536984),
         (0.1905799087567123, -0.09125630012069194, -1.5246392700536984),
@@ -1244,9 +1302,9 @@ class BSControlsData():
         (-0.19264094262533524, 0.19817013157252422, -1.1558456557520116),
         (-0.1905799087567123, -0.09125630012069194, -1.5246392700536984),
         (-0.7623196350268492, -0.09125630012069194, -1.5246392700536984),
-        (0.0, -0.5758674561293435, -2.0128282558399926)
+        (0.0, -0.5758674561293435, -2.0128282558399926),
     ]
-    cvTuples['Two Arrows'] = [
+    cvTuples["Two Arrows"] = [
         (0.0, 0.0, -2.4246948424842265),
         (0.9698779369936905, 0.0, -1.4548169054905358),
         (0.48493896849684526, 0.0, -1.4548169054905358),
@@ -1257,9 +1315,9 @@ class BSControlsData():
         (-0.48493896849684526, 0.0, 1.4548169054905358),
         (-0.48493896849684526, 0.0, -1.4548169054905358),
         (-0.9698779369936905, 0.0, -1.4548169054905358),
-        (0.0, 0.0, -2.4246948424842265)
+        (0.0, 0.0, -2.4246948424842265),
     ]
-    cvTuples['Two Arrows Thin'] = [
+    cvTuples["Two Arrows Thin"] = [
         (0.0, 0.0, -2.4246948424842265),
         (0.9698779369936905, 0.0, -1.4548169054905358),
         (0.25863410610275417, 0.0, -1.4548169054905358),
@@ -1270,9 +1328,9 @@ class BSControlsData():
         (-0.25863410610275417, 0.0, 1.4548169054905358),
         (-0.25863410610275417, 0.0, -1.4548169054905358),
         (-0.9698779369936905, 0.0, -1.4548169054905358),
-        (0.0, 0.0, -2.4246948424842265)
+        (0.0, 0.0, -2.4246948424842265),
     ]
-    cvTuples['Curved Two Arrows'] = [
+    cvTuples["Curved Two Arrows"] = [
         (0.0, -1.110514931482559, -2.4255007827347024),
         (0.0, 0.7726167603219469, -2.2923655188962426),
         (0.0, -0.14948435475560623, -2.088726321246109),
@@ -1293,9 +1351,9 @@ class BSControlsData():
         (0.0, 0.05782017149007778, -1.4444491504143115),
         (0.0, -0.4146179005990214, -1.7377263146772652),
         (0.0, -0.19669122111505885, -0.7735812040562015),
-        (0.0, -1.110514931482559, -2.4255007827347024)
+        (0.0, -1.110514931482559, -2.4255007827347024),
     ]
-    cvTuples['Curved Two Arrows Thin'] = [
+    cvTuples["Curved Two Arrows Thin"] = [
         (0.0, -0.9694380161318109, -2.4255004686919825),
         (0.0, 0.2502008909280916, -2.339273865903459),
         (0.0, -0.4071169757601066, -2.2217294706311543),
@@ -1324,9 +1382,9 @@ class BSControlsData():
         (0.0, -0.33594277948406914, -1.9150605654876764),
         (0.0, -0.5177774738281845, -2.010148126488103),
         (0.0, -0.37758522389678706, -1.3556096064338676),
-        (0.0, -0.9694380161318109, -2.4255004686919825)
+        (0.0, -0.9694380161318109, -2.4255004686919825),
     ]
-    cvTuples['One Arrow'] = [
+    cvTuples["One Arrow"] = [
         (0.0, 0.0, -2.001501540839854),
         (1.6012012326718834, 0.0, -0.40030030816797085),
         (0.8006006163359417, 0.0, -0.40030030816797085),
@@ -1334,9 +1392,9 @@ class BSControlsData():
         (-0.8006006163359417, 0.0, 2.001501540839854),
         (-0.8006006163359417, 0.0, -0.40030030816797085),
         (-1.6012012326718834, 0.0, -0.40030030816797085),
-        (0.0, 0.0, -2.001501540839854)
+        (0.0, 0.0, -2.001501540839854),
     ]
-    cvTuples['One Arrow Thin'] = [
+    cvTuples["One Arrow Thin"] = [
         (0.0, 0.0, -2.0),
         (1.2987239525074818, 0.0, -0.40030030816797085),
         (0.40030030816797085, 0.0, -0.40030030816797085),
@@ -1344,13 +1402,56 @@ class BSControlsData():
         (-0.40030030816797085, 0.0, 2.001501540839854),
         (-0.40030030816797085, 0.0, -0.40030030816797085),
         (-1.2987239525074818, 0.0, -0.40030030816797085),
-        (0.0, 0.0, -2.0)
-
+        (0.0, 0.0, -2.0),
     ]
-    cvTuples['Spine setting'] = [(-0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16), (-0.918250560760498, 2.0240094661712646, 2.858504851109545e-16), (-1.5223431587219238, 1.6035150289535522, 3.3962937455573846e-16), (-1.8773924112319946, 1.0828299522399902, 4.1469663718474636e-16), (-0.6005929112434387, 1.4630693197250366, 1.3423976671433165e-16), (-2.4890353679656982, 0.29243525862693787, 5.524171534469215e-16), (-2.223422050476074, 2.4896340370178223, 4.938351901445117e-16), (-2.083423137664795, 1.2679976224899292, 4.625790920556767e-16), (-1.687940001487732, 1.8989613056182861, -3.7479749431146737e-16), (-0.9688037037849426, 2.360983371734619, -2.1511787388485106e-16), (7.258404366439208e-05, 2.508406162261963, 1.693115606156445e-20), (0.9686800241470337, 2.360907554626465, 2.150873012894111e-16), (1.6874980926513672, 1.8986189365386963, 3.747094028849529e-16), (2.083423137664795, 1.2679976224899292, 4.625790920556767e-16), (2.223422050476074, 2.4896340370178223, 4.938351901445117e-16), (2.4890353679656982, 0.29243525862693787, 5.524171534469215e-16), (0.6005929112434387, 1.4630693197250366, 1.3423976671433165e-16), (1.8773924112319946, 1.0828299522399902, 4.1469663718474636e-16), (1.5223431587219238, 1.6035150289535522, 3.3962937455573846e-16), (0.918250560760498, 2.0240094661712646, 2.858504851109545e-16), (0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16), (0.08592691272497177, 0.5636681318283081, -2.0147902877750112e-16),
-                                 (0.52218097448349, 0.47179681062698364, -1.3953357705088321e-16), (0.7485123872756958, 0.7740142345428467, -2.0697516087443826e-16), (1.0257539749145508, 0.27251502871513367, -1.303518590166548e-16), (0.6727041006088257, 0.2193627655506134, -9.056141429331018e-17), (0.6731530427932739, -0.2053752839565277, -2.412352522117238e-18), (1.0283035039901733, -0.2637050747871399, -1.409913306792752e-17), (0.7504342794418335, -0.7479293346405029, 1.0711562769110121e-16), (0.5203362107276917, -0.4711986780166626, 6.45972074820057e-17), (0.15535776317119598, -0.6831546425819397, 1.3447239637236116e-16), (0.28157803416252136, -1.020136833190918, 1.969111653814159e-16), (-0.2764538824558258, -1.0215308666229248, 2.3565229510179005e-16), (-0.15191972255706787, -0.6839203834533691, 1.5580709167088805e-16), (-0.5179504156112671, -0.4737990200519562, 1.3667537024949198e-16), (-0.746666431427002, -0.7516481280326843, 2.11073675373516e-16), (-1.0269376039505005, -0.26891738176345825, 1.2851938264460893e-16), (-0.6721401810646057, -0.2084762454032898, 9.121006947733956e-17), (-0.6736156940460205, 0.21515318751335144, 2.216130598363787e-18), (-1.0275888442993164, 0.2699747681617737, 1.41311565381619e-17), (-0.7507237792015076, 0.7631686329841614, -1.0711789747470206e-16), (-0.5293189287185669, 0.4840444028377533, -6.418310763247186e-17), (-0.08592691272497177, 0.5636681318283081, -2.0147902877750112e-16), (-0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16)]
+    cvTuples["Spine setting"] = [
+        (-0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16),
+        (-0.918250560760498, 2.0240094661712646, 2.858504851109545e-16),
+        (-1.5223431587219238, 1.6035150289535522, 3.3962937455573846e-16),
+        (-1.8773924112319946, 1.0828299522399902, 4.1469663718474636e-16),
+        (-0.6005929112434387, 1.4630693197250366, 1.3423976671433165e-16),
+        (-2.4890353679656982, 0.29243525862693787, 5.524171534469215e-16),
+        (-2.223422050476074, 2.4896340370178223, 4.938351901445117e-16),
+        (-2.083423137664795, 1.2679976224899292, 4.625790920556767e-16),
+        (-1.687940001487732, 1.8989613056182861, -3.7479749431146737e-16),
+        (-0.9688037037849426, 2.360983371734619, -2.1511787388485106e-16),
+        (7.258404366439208e-05, 2.508406162261963, 1.693115606156445e-20),
+        (0.9686800241470337, 2.360907554626465, 2.150873012894111e-16),
+        (1.6874980926513672, 1.8986189365386963, 3.747094028849529e-16),
+        (2.083423137664795, 1.2679976224899292, 4.625790920556767e-16),
+        (2.223422050476074, 2.4896340370178223, 4.938351901445117e-16),
+        (2.4890353679656982, 0.29243525862693787, 5.524171534469215e-16),
+        (0.6005929112434387, 1.4630693197250366, 1.3423976671433165e-16),
+        (1.8773924112319946, 1.0828299522399902, 4.1469663718474636e-16),
+        (1.5223431587219238, 1.6035150289535522, 3.3962937455573846e-16),
+        (0.918250560760498, 2.0240094661712646, 2.858504851109545e-16),
+        (0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16),
+        (0.08592691272497177, 0.5636681318283081, -2.0147902877750112e-16),
+        (0.52218097448349, 0.47179681062698364, -1.3953357705088321e-16),
+        (0.7485123872756958, 0.7740142345428467, -2.0697516087443826e-16),
+        (1.0257539749145508, 0.27251502871513367, -1.303518590166548e-16),
+        (0.6727041006088257, 0.2193627655506134, -9.056141429331018e-17),
+        (0.6731530427932739, -0.2053752839565277, -2.412352522117238e-18),
+        (1.0283035039901733, -0.2637050747871399, -1.409913306792752e-17),
+        (0.7504342794418335, -0.7479293346405029, 1.0711562769110121e-16),
+        (0.5203362107276917, -0.4711986780166626, 6.45972074820057e-17),
+        (0.15535776317119598, -0.6831546425819397, 1.3447239637236116e-16),
+        (0.28157803416252136, -1.020136833190918, 1.969111653814159e-16),
+        (-0.2764538824558258, -1.0215308666229248, 2.3565229510179005e-16),
+        (-0.15191972255706787, -0.6839203834533691, 1.5580709167088805e-16),
+        (-0.5179504156112671, -0.4737990200519562, 1.3667537024949198e-16),
+        (-0.746666431427002, -0.7516481280326843, 2.11073675373516e-16),
+        (-1.0269376039505005, -0.26891738176345825, 1.2851938264460893e-16),
+        (-0.6721401810646057, -0.2084762454032898, 9.121006947733956e-17),
+        (-0.6736156940460205, 0.21515318751335144, 2.216130598363787e-18),
+        (-1.0275888442993164, 0.2699747681617737, 1.41311565381619e-17),
+        (-0.7507237792015076, 0.7631686329841614, -1.0711789747470206e-16),
+        (-0.5293189287185669, 0.4840444028377533, -6.418310763247186e-17),
+        (-0.08592691272497177, 0.5636681318283081, -2.0147902877750112e-16),
+        (-0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16),
+    ]
 
-    cvTuples['Circle One Arrow'] = [
+    cvTuples["Circle One Arrow"] = [
         (1.099320267429756, -1.6524720822501887e-18, -0.35719078779323343),
         (1.1558929681777954, 0.0, 0.0),
         (1.099319577217102, 0.0, 0.3571905791759491),
@@ -1375,9 +1476,9 @@ class BSControlsData():
         (0.35719075798988337, 0.0, -1.0993201732635498),
         (0.6794172525405884, 0.0, -0.9351376295089722),
         (0.9351376891136169, 0.0, -0.6794172525405884),
-        (1.0993203175159225, 1.6524720822501887e-18, -0.35719078779117824)
+        (1.0993203175159225, 1.6524720822501887e-18, -0.35719078779117824),
     ]
-    cvTuples['Circle Two Arrows'] = [
+    cvTuples["Circle Two Arrows"] = [
         (0.9351376625974113, 0.0, -0.6794173552984247),
         (1.0993202924728394, 0.0, -0.3571907877922058),
         (1.1558929681777954, 0.0, 0.0),
@@ -1406,9 +1507,9 @@ class BSControlsData():
         (0.3527931571006775, -7.92686430293274e-17, -1.3530908278952074),
         (0.3571907579898834, 0.0, -1.0993201732635498),
         (0.6794172525405884, 0.0, -0.9351376295089722),
-        (0.9351377156298226, 0.0, -0.679417149782752)
+        (0.9351377156298226, 0.0, -0.679417149782752),
     ]
-    cvTuples['Circle Three Arrows'] = [
+    cvTuples["Circle Three Arrows"] = [
         (0.0, 0.0, 2.0),
         (0.6794168353060688, 0.0, 1.3230991421415497),
         (0.3527929484844208, 0.0, 1.323098990664334),
@@ -1441,9 +1542,9 @@ class BSControlsData():
         (-0.35719063878059387, 0.0, 1.0993196964263916),
         (-0.35719063878059387, 0.0, 1.3230991421415497),
         (-0.6794169545165505, 0.0, 1.323098990664334),
-        (0.0, 0.0, 2.0)
+        (0.0, 0.0, 2.0),
     ]
-    cvTuples['Circle Four Arrows'] = [
+    cvTuples["Circle Four Arrows"] = [
         (-2.1216866207846587, 0.0, 0.0),
         (-1.4913854205677681, 0.0, 0.6710521160554896),
         (-1.4913851613995965, 0.0, 0.35279303789138794),
@@ -1480,9 +1581,9 @@ class BSControlsData():
         (-1.0993198156356812, 0.0, -0.35719063878059387),
         (-1.4913842573417506, 0.0, -0.35719063878059387),
         (-1.4913843596644172, 0.0, -0.6794172943630804),
-        (-2.1216866207846587, 0.0, 0.0)
+        (-2.1216866207846587, 0.0, 0.0),
     ]
-    cvTuples['Sphere Four Arrows'] = [
+    cvTuples["Sphere Four Arrows"] = [
         (0.0, 0.0, -2.36394347671107),
         (0.7879811589036899, 0.0, -1.5759623178073798),
         (0.39399057945184496, 0.0, -1.5759623178073798),
@@ -1615,9 +1716,9 @@ class BSControlsData():
         (0.0, -0.38348065146921434, -1.1802328196679974),
         (0.0, -0.38348065146921434, -1.5759623178073798),
         (0.0, -0.7879811589036899, -1.5759623178073798),
-        (0.0, 0.0, -2.36394347671107)
+        (0.0, 0.0, -2.36394347671107),
     ]
-    cvTuples['Gear'] = [
+    cvTuples["Gear"] = [
         (-0.1831451367158871, 0.0, -1.9688981435835975),
         (-0.08016223035760504, 0.0, -1.424910142313325),
         (0.2913626899858565, 0.0, -1.397105097768184),
@@ -1654,5 +1755,5 @@ class BSControlsData():
         (-0.7818781194705111, 0.0, -1.1939273299588267),
         (-1.0221485254519176, 0.0, -1.692725478260187),
         (-0.6178520249074192, 0.0, -1.8770031626614314),
-        (-0.1831451367158871, 0.0, -1.9688981435835975)
+        (-0.1831451367158871, 0.0, -1.9688981435835975),
     ]
