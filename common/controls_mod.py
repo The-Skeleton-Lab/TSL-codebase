@@ -3,6 +3,8 @@ import pymel.core as pm
 import random
 import common.utils_mod as ut
 import common.transforms_mod as trs
+
+
 class controls():
     '''
     control class for making and editing controls
@@ -14,7 +16,8 @@ class controls():
     #scaling control just need any group from the module -
     cc.scale_control_module(obj = 'Krishna_01_zero_group',val = .8)
     '''
-    def create_control(self, curveType = 'Square', basename = 'temp',zgrps = 1,pos = None, sub_controls =1, cons_from = None,cons_to =None ,cons_typ_mtx = True , inheritTr= 1, color = [.4,.5,.7], line_thickness = 1.5, create_joint = False, jnt_grp = True,parent_to =None, control_scale = 1):
+
+    def create_control(self, curveType='Square', basename='temp', zgrps=1, pos=None, sub_controls=1, cons_from=None, cons_to=None, cons_typ_mtx=True, inheritTr=1, color=[.4, .5, .7], line_thickness=1.5, create_joint=False, jnt_grp=True, parent_to=None, control_scale=1):
         '''
         #
         #
@@ -46,50 +49,50 @@ class controls():
         '''
         baseMtx = pm.datatypes.Matrix()
         utz = ut.utilites()
-        #create control and base group
+        # create control and base group
         shape = BSControlsUtils()
-        
-        ctl = pm.PyNode(shape.bsDrawCurve(curve = curveType,name = basename+'_ctrl'))
-        ctl.v.setLocked(1)
-        ctl.v.setKeyable(0)   
-            
 
-        utz.object_tag(ctl,'control')
-        
-        cgrp = pm.createNode('transform', name  =basename+'_ctrl_group')
+        ctl = pm.PyNode(shape.bsDrawCurve(
+            curve=curveType, name=basename+'_ctrl'))
+        ctl.v.setLocked(1)
+        ctl.v.setKeyable(0)
+
+        utz.object_tag(ctl, 'control')
+
+        cgrp = pm.createNode('transform', name=basename+'_ctrl_group')
         if jnt_grp:
 
-            jnt_grp = pm.createNode('transform', name  =basename+'_ctrl_jnt_grp')
+            jnt_grp = pm.createNode('transform', name=basename+'_ctrl_jnt_grp')
             utz.object_tag(jnt_grp)
-        
+
             jnt_grp.v.set(0)
             jnt_grp.v.setLocked(1)
             jnt_grp.v.setKeyable(0)
 
-            pm.parent(jnt_grp,cgrp)
+            pm.parent(jnt_grp, cgrp)
 
-
-        utz.object_tag(cgrp,'control_grp')
-        pm.parent(ctl,cgrp)
+        utz.object_tag(cgrp, 'control_grp')
+        pm.parent(ctl, cgrp)
         last_output_node = None
-        #extra group creation
+        # extra group creation
         extra_grps = []
-        if zgrps>0:
-            for i in range(1,zgrps+1):
-                
-                tr_node = pm.createNode('transform', name  = '%s_0%d_zero_group'%(basename,i))
+        if zgrps > 0:
+            for i in range(1, zgrps+1):
+
+                tr_node = pm.createNode(
+                    'transform', name='%s_0%d_zero_group' % (basename, i))
                 extra_grps.append(tr_node)
                 utz.object_tag(tr_node)
                 if i == 1:
                     pass
                 else:
-                    
-                    pm.parent(tr_node,extra_grps[i-2])
-                #extra_grps.append(tr_node)
-            pm.parent(cgrp,extra_grps[-1])
-        elif zgrps==0:
+
+                    pm.parent(tr_node, extra_grps[i-2])
+                # extra_grps.append(tr_node)
+            pm.parent(cgrp, extra_grps[-1])
+        elif zgrps == 0:
             extra_grps = [cgrp]
-        #set position of the toppest zero group
+        # set position of the toppest zero group
         if pos == None:
             Posmtx = pm.datatypes.Matrix()
             extra_grps[0].offsetParentMatrix.set(Posmtx)
@@ -108,58 +111,61 @@ class controls():
                     extra_grps[0].setRotation(rt)
                     extra_grps[0].setScale(sc)
                 except ValueError:
-                    print("Pos attribute is not a matrix, mtx example = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]")
-        # sub_controls 
+                    print(
+                        "Pos attribute is not a matrix, mtx example = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]")
+        # sub_controls
         sub_ctrls = []
-        pm.addAttr(ctl, ln = 'sub_vis',at = 'bool', dv =0)
+        pm.addAttr(ctl, ln='sub_vis', at='bool', dv=0)
         if sub_controls > 0:
-            
-            for i in range(1,sub_controls+1):
-                tr_node = pm.PyNode(shape.bsDrawCurve(curve = curveType,name = '%s_0%d_sub_ctrl'%(basename,i)))
+
+            for i in range(1, sub_controls+1):
+                tr_node = pm.PyNode(shape.bsDrawCurve(
+                    curve=curveType, name='%s_0%d_sub_ctrl' % (basename, i)))
                 sub_ctrls.append(tr_node)
-                utz.object_tag(tr_node,'control')
-                shape.shape_scale_adjust([tr_node],1-(i/10))
-                shapes = pm.listRelatives(tr_node,s=1)
+                utz.object_tag(tr_node, 'control')
+                shape.shape_scale_adjust([tr_node], 1-(i/10))
+                shapes = pm.listRelatives(tr_node, s=1)
                 cPy = pm.PyNode(ctl)
-                cPy.sub_vis>>tr_node.v
+                cPy.sub_vis >> tr_node.v
                 cPy.sub_vis.setKeyable(1)
                 tr_node.v.lock()
                 tr_node.v.setKeyable(0)
                 for sh in shapes:
                     sh.overrideEnabled.set(1)
                     sh.overrideRGBColors.set(1)
-                    sh.overrideColorR.set(random.uniform(.3,.7))
-                    sh.overrideColorG.set(random.uniform(.3,.7))
-                    sh.overrideColorB.set(random.uniform(.3,.7))
+                    sh.overrideColorR.set(random.uniform(.3, .7))
+                    sh.overrideColorG.set(random.uniform(.3, .7))
+                    sh.overrideColorB.set(random.uniform(.3, .7))
                     sh.lineWidth.set(1.1)
                 if i == 1:
                     pass
                 else:
 
-                    pm.parent(tr_node,sub_ctrls[i-2])
-                
-            pm.parent(sub_ctrls[0],ctl)
+                    pm.parent(tr_node, sub_ctrls[i-2])
+
+            pm.parent(sub_ctrls[0], ctl)
             last_output_node = sub_ctrls[0]
         else:
             last_output_node = ctl
-        #cons_from
+        # cons_from
         if cons_from != None:
             if cons_typ_mtx is True:
                 parent = pm.PyNode(cons_from)
                 child = extra_grps[0]
-                cons_mtx = pm.createNode('multMatrix',n ='%s_TO_%s_mtx_con'%(str(parent),str(child)))
+                cons_mtx = pm.createNode(
+                    'multMatrix', n='%s_TO_%s_mtx_con' % (str(parent), str(child)))
                 pMtx = parent.worldMatrix.get()
                 cMtx = child.worldMatrix.get()
                 mm = pMtx.inverse()*cMtx
                 cons_mtx.matrixIn[0].set(mm)
-                parent.worldMatrix>>cons_mtx.matrixIn[1]
-                cons_mtx.matrixSum>>child.offsetParentMatrix
+                parent.worldMatrix >> cons_mtx.matrixIn[1]
+                cons_mtx.matrixSum >> child.offsetParentMatrix
             else:
                 parent = pm.PyNode(cons_from)
                 child = extra_grps[0]
-                pm.parentConstraint(parent,child,mo=1)
-                pm.scaleConstraint(parent,child,mo=1)
-        #cons_to
+                pm.parentConstraint(parent, child, mo=1)
+                pm.scaleConstraint(parent, child, mo=1)
+        # cons_to
         if cons_to != None:
             if cons_typ_mtx is True:
                 parent = pm.PyNode(ctl)
@@ -169,13 +175,14 @@ class controls():
                     child = [cons_to]
                 for ch in child:
                     chpy = pm.PyNode(ch)
-                    cons_mtx = pm.createNode('multMatrix',n ='%s_TO_%s_mtx_con'%(str(parent),str(chpy)))
+                    cons_mtx = pm.createNode(
+                        'multMatrix', n='%s_TO_%s_mtx_con' % (str(parent), str(chpy)))
                     pMtx = parent.worldMatrix.get()
                     cMtx = chpy.worldMatrix.get()
                     mm = pMtx.inverse()*cMtx
                     cons_mtx.matrixIn[0].set(mm)
-                    parent.worldMatrix>>cons_mtx.matrixIn[1]
-                    cons_mtx.matrixSum>>chpy.offsetParentMatrix
+                    parent.worldMatrix >> cons_mtx.matrixIn[1]
+                    cons_mtx.matrixSum >> chpy.offsetParentMatrix
             else:
                 parent = pm.PyNode(ctl)
                 if type(cons_to) is list:
@@ -184,10 +191,10 @@ class controls():
                     child = [cons_to]
                 for ch in child:
                     chpy = pm.PyNode(ch)
-                    pm.parentConstraint(parent,chpy,mo=1)
-                    pm.scaleConstraint(parent,chpy,mo=1)
-        #color & line width
-        shapes = pm.listRelatives(ctl,s=1)
+                    pm.parentConstraint(parent, chpy, mo=1)
+                    pm.scaleConstraint(parent, chpy, mo=1)
+        # color & line width
+        shapes = pm.listRelatives(ctl, s=1)
         for i in shapes:
             i.overrideEnabled.set(1)
             i.overrideRGBColors.set(1)
@@ -196,62 +203,61 @@ class controls():
             i.overrideColorB.set(color[2])
             i.lineWidth.set(line_thickness)
 
-
-
-        #ctl_output
-        ctl_output = pm.createNode('transform',n = basename+'_ctrl_output')
+        # ctl_output
+        ctl_output = pm.createNode('transform', n=basename+'_ctrl_output')
         utz.object_tag(ctl_output)
         ctl_output.v.set(0)
-        last_control = pm.listRelatives(ctl,ad=1,typ ='transform')[0]
-        pm.parent(ctl_output,last_control)
-        
-        #inherit Transform for first group of the control
+        last_control = pm.listRelatives(ctl, ad=1, typ='transform')[0]
+        pm.parent(ctl_output, last_control)
+
+        # inherit Transform for first group of the control
         extra_grps[0].inheritsTransform.set(inheritTr)
-        #crerate control message attr for shape scales
+        # crerate control message attr for shape scales
         all_controls = [pm.PyNode(ctl)]+sub_ctrls
-        pm.addAttr(cgrp,at ='compound',ln = 'controls',multi =1,numberOfChildren=len(all_controls))
-        ######creating attributes and connecting them differently because of some reason they dont work in the same loop
+        pm.addAttr(cgrp, at='compound', ln='controls',
+                   multi=1, numberOfChildren=len(all_controls))
+        # creating attributes and connecting them differently because of some reason they dont work in the same loop
         for i in all_controls:
             if '|' in str(i):
                 i2 = i.split('|')[-1]
             else:
                 i2 = str(i)
-            pm.addAttr(cgrp,ln = i2,at = 'message',parent = 'controls')
-        #### connect 
+            pm.addAttr(cgrp, ln=i2, at='message', parent='controls')
+        # connect
         for i in all_controls:
             if '|' in str(i):
                 i2 = i.split('|')[-1]
             else:
                 i2 = str(i)
-            pm.connectAttr(i.message,'%s.controls[0].%s'%(cgrp,i2))
-        
+            pm.connectAttr(i.message, '%s.controls[0].%s' % (cgrp, i2))
+
         pm.select(cl=1)
         if create_joint:
             t = trs.tf_class()
-            jnt = t.create_transform(Trname=basename+'_ctrl',typ='joint')
-            print (jnt)
-            pm.parent(jnt,jnt_grp)
-            ctl_output.worldMatrix[0]>>jnt.offsetParentMatrix
+            jnt = t.create_transform(Trname=basename+'_ctrl', typ='joint')
+            print(jnt)
+            pm.parent(jnt, jnt_grp)
+            ctl_output.worldMatrix[0] >> jnt.offsetParentMatrix
         if parent_to:
-            pm.parent(extra_grps[0],parent_to)
+            pm.parent(extra_grps[0], parent_to)
 
-        #shape scale
+        # shape scale
         for i in sub_ctrls:
-            shape.shape_scale_adjust([i],control_scale)
-        shape.shape_scale_adjust([ctl],control_scale)
-        
+            shape.shape_scale_adjust([i], control_scale)
+        shape.shape_scale_adjust([ctl], control_scale)
+
         self.control_group = cgrp
         self.control_output = ctl_output
         self.top_group = extra_grps[0]
 
-        return cgrp,ctl_output, extra_grps[0]
-    
-    def scale_control_module(self,obj,val=1):
+        return cgrp, ctl_output, extra_grps[0]
+
+    def scale_control_module(self, obj, val=1):
         '''
-        
+
         cc.scale_control_module(obj = 'Krishna_01_zero_group',val = .8)
         '''
-        children = pm.listRelatives(obj,ad=1, typ = 'transform')
+        children = pm.listRelatives(obj, ad=1, typ='transform')
         ctrl_grp = None
         shape = BSControlsUtils()
         for i in children:
@@ -260,19 +266,20 @@ class controls():
         if ctrl_grp:
             connections = pm.listConnections(ctrl_grp.controls)
             for cn in connections:
-                shape.shape_scale_adjust([cn],val)
+                shape.shape_scale_adjust([cn], val)
+
 
 class BSControlsUtils():
     # Function to draw nurbs curves from dictionary data and user input.
-    def bsDrawCurve(self, curve = 'Circle', thickness = 1,name = 'temp_ctrl'):
+    def bsDrawCurve(self, curve='Circle', thickness=1, name='temp_ctrl'):
         # Exception for Circle shape.
         if curve == 'Circle':
-            crv = cmds.circle(d=3, r=2, nr=[0,1,0], ch=False)
+            crv = cmds.circle(d=3, r=2, nr=[0, 1, 0], ch=False)
         else:
             crv = cmds.curve(d=1, p=BSControlsData.cvTuples[curve])
         # Exception for adding an additional shape node to the Gear curve.
         if curve == 'Gear':
-            circle = cmds.circle(r=0.9, nr=[0,1,0])
+            circle = cmds.circle(r=0.9, nr=[0, 1, 0])
             circleShape = cmds.listRelatives(circle, s=True)
             circleShape = cmds.rename(circleShape, crv + 'CircleShape')
             cmds.parent(circleShape, crv, add=True, s=True)
@@ -281,12 +288,13 @@ class BSControlsUtils():
         if thickness > 1.0:
             crvShape = cmds.listRelatives(crv, s=True)
             for c in crvShape:
-                cmds.setAttr('%s.lineWidth'%(c), thickness)
+                cmds.setAttr('%s.lineWidth' % (c), thickness)
         else:
             pass
-        v = cmds.rename(crv,name)
+        v = cmds.rename(crv, name)
         return v
-    def shape_scale_adjust(self,ctrl = [], value = 1.1): 
+
+    def shape_scale_adjust(self, ctrl=[], value=1.1):
         '''
         ctrl takes transforms as a list 
         value when above 1 increases when below 1 decreases the size of the nurb curve
@@ -294,25 +302,27 @@ class BSControlsUtils():
         v = value
         ctrl_base = ctrl
         for c in ctrl_base:
-            shapes = pm.listRelatives(c,s=1)
+            shapes = pm.listRelatives(c, s=1)
             TmpTrans = []
             newShp = []
             for i in shapes:
-                tmtr  = pm.createNode('transform',n=('temp'+i))
-                pm.parent(i,tmtr,r =True, s = True)
-                #nshape = pm.duplicate(i,n=('temp'+i))
-                pm.xform(tmtr,s=(v,v,v))
-                pm.makeIdentity(tmtr, apply=True, t=1, r=1, s=1 )
+                tmtr = pm.createNode('transform', n=('temp'+i))
+                pm.parent(i, tmtr, r=True, s=True)
+                # nshape = pm.duplicate(i,n=('temp'+i))
+                pm.xform(tmtr, s=(v, v, v))
+                pm.makeIdentity(tmtr, apply=True, t=1, r=1, s=1)
                 newShp.append(i)
                 TmpTrans.append(tmtr)
             pm.select(cl=True)
             for i in newShp:
                 pm.select(i)
-                pm.rename(i,c+'_Shape_00')
-                pm.select(c , add=True)
-                pm.parent(r=True,s=True)
+                pm.rename(i, c+'_Shape_00')
+                pm.select(c, add=True)
+                pm.parent(r=True, s=True)
                 pm.delete(TmpTrans)
                 pm.select(c)
+
+
 class BSControlsData():
     '''
     If you wish to add more control curve options to the menu, simply add a new name into the "controlNames" list and a corresponding key in the dictionary
@@ -325,34 +335,34 @@ class BSControlsData():
     tupleList = [tuple(i) for i in list]
     '''
     # List of all control curve names.
-    controlNames = ['Circle', 'Half Circle', 'Square', 'Triangle', 'Sphere', 'Half Sphere','Box', 'Pyramid', 'Diamond', 'Circle Pin','Square Pin', 
-        'Sphere Pin', 'Circle Dumbbell', 'Square Dumbbell', 'Sphere Dumbbell', 'Cross', 'Cross Thin', 'Locator', 'Four Arrows', 'Four Arrows Thin',
-        'Curved Four Arrows', 'Curved Four Arrows Thin', 'Two Arrows', 'Two Arrows Thin', 'Curved Two Arrows', 'Curved Two Arrows Thin', 'One Arrow', 
-        'One Arrow Thin', 'Circle One Arrow',  'Circle Two Arrows', 'Circle Three Arrows', 'Circle Four Arrows', 'Sphere Four Arrows', 'Gear']
+    controlNames = ['Circle', 'Half Circle', 'Square', 'Triangle', 'Sphere', 'Half Sphere', 'Box', 'Pyramid', 'Diamond', 'Circle Pin', 'Square Pin',
+                    'Sphere Pin', 'Circle Dumbbell', 'Square Dumbbell', 'Sphere Dumbbell', 'Cross', 'Cross Thin', 'Locator', 'Four Arrows', 'Four Arrows Thin',
+                    'Curved Four Arrows', 'Curved Four Arrows Thin', 'Two Arrows', 'Two Arrows Thin', 'Curved Two Arrows', 'Curved Two Arrows Thin', 'One Arrow',
+                    'One Arrow Thin', 'Circle One Arrow',  'Circle Two Arrows', 'Circle Three Arrows', 'Circle Four Arrows', 'Sphere Four Arrows', 'Gear']
     # Control curve CV tuples dictionary.
     cvTuples = {}
     # Control curve CV dictionary keys.
     cvTuples['Half Circle'] = [
-        (1.2246467991473532e-16, 1.2246467991473532e-16, -2.0), 
-        (-0.3901806440322564, 1.2011155542966555e-16, -1.9615705608064609), 
-        (-0.7653668647301793, 1.1314261122877003e-16, -1.8477590650225735), 
-        (-1.1111404660392044, 1.0182565992946028e-16, -1.6629392246050905), 
-        (-1.414213562373095, 8.659560562354932e-17, -1.414213562373095), 
-        (-1.6629392246050902, 6.80377307569005e-17, -1.1111404660392044), 
-        (-1.8477590650225733, 4.6865204053262986e-17, -0.7653668647301796), 
-        (-1.9615705608064604, 2.3891673840167793e-17, -0.3901806440322566), 
-        (-1.9999999999999996, 1.4296954280543742e-32, -2.3348698237725095e-16), 
-        (-1.0, -1.0182565992946023e-16, 1.0736898889973645e-06), 
-        (-2.334869823772509e-16, -1.2246467991473525e-16, 4.444297557526511e-06), 
-        (1.0, -1.1314261122876998e-16, 2.9218882460213536e-06), 
-        (1.9999999999999982, -3.1292342698629875e-32, 5.1104273853354e-16), 
-        (1.961570560806459, 2.3891673840167737e-17, -0.39018064403225566), 
-        (1.847759065022572, 4.68652040532629e-17, -0.7653668647301782), 
-        (1.662939224605089, 6.80377307569004e-17, -1.1111404660392028), 
-        (1.4142135623730938, 8.659560562354922e-17, -1.4142135623730931), 
-        (1.1111404660392035, 1.0182565992946014e-16, -1.6629392246050883), 
-        (0.7653668647301792, 1.1314261122876988e-16, -1.847759065022571), 
-        (0.3901806440322567, 1.2011155542966538e-16, -1.9615705608064582), 
+        (1.2246467991473532e-16, 1.2246467991473532e-16, -2.0),
+        (-0.3901806440322564, 1.2011155542966555e-16, -1.9615705608064609),
+        (-0.7653668647301793, 1.1314261122877003e-16, -1.8477590650225735),
+        (-1.1111404660392044, 1.0182565992946028e-16, -1.6629392246050905),
+        (-1.414213562373095, 8.659560562354932e-17, -1.414213562373095),
+        (-1.6629392246050902, 6.80377307569005e-17, -1.1111404660392044),
+        (-1.8477590650225733, 4.6865204053262986e-17, -0.7653668647301796),
+        (-1.9615705608064604, 2.3891673840167793e-17, -0.3901806440322566),
+        (-1.9999999999999996, 1.4296954280543742e-32, -2.3348698237725095e-16),
+        (-1.0, -1.0182565992946023e-16, 1.0736898889973645e-06),
+        (-2.334869823772509e-16, -1.2246467991473525e-16, 4.444297557526511e-06),
+        (1.0, -1.1314261122876998e-16, 2.9218882460213536e-06),
+        (1.9999999999999982, -3.1292342698629875e-32, 5.1104273853354e-16),
+        (1.961570560806459, 2.3891673840167737e-17, -0.39018064403225566),
+        (1.847759065022572, 4.68652040532629e-17, -0.7653668647301782),
+        (1.662939224605089, 6.80377307569004e-17, -1.1111404660392028),
+        (1.4142135623730938, 8.659560562354922e-17, -1.4142135623730931),
+        (1.1111404660392035, 1.0182565992946014e-16, -1.6629392246050883),
+        (0.7653668647301792, 1.1314261122876988e-16, -1.847759065022571),
+        (0.3901806440322567, 1.2011155542966538e-16, -1.9615705608064582),
         (7.330873434585712e-16, 1.2246467991473515e-16, -1.9999999999999973)
     ]
     cvTuples['Square'] = [
@@ -1335,9 +1345,10 @@ class BSControlsData():
         (-0.40030030816797085, 0.0, -0.40030030816797085),
         (-1.2987239525074818, 0.0, -0.40030030816797085),
         (0.0, 0.0, -2.0)
-    
+
     ]
-    cvTuples['Spine setting'] = [(-0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16), (-0.918250560760498, 2.0240094661712646, 2.858504851109545e-16), (-1.5223431587219238, 1.6035150289535522, 3.3962937455573846e-16), (-1.8773924112319946, 1.0828299522399902, 4.1469663718474636e-16), (-0.6005929112434387, 1.4630693197250366, 1.3423976671433165e-16), (-2.4890353679656982, 0.29243525862693787, 5.524171534469215e-16), (-2.223422050476074, 2.4896340370178223, 4.938351901445117e-16), (-2.083423137664795, 1.2679976224899292, 4.625790920556767e-16), (-1.687940001487732, 1.8989613056182861, -3.7479749431146737e-16), (-0.9688037037849426, 2.360983371734619, -2.1511787388485106e-16), (7.258404366439208e-05, 2.508406162261963, 1.693115606156445e-20), (0.9686800241470337, 2.360907554626465, 2.150873012894111e-16), (1.6874980926513672, 1.8986189365386963, 3.747094028849529e-16), (2.083423137664795, 1.2679976224899292, 4.625790920556767e-16), (2.223422050476074, 2.4896340370178223, 4.938351901445117e-16), (2.4890353679656982, 0.29243525862693787, 5.524171534469215e-16), (0.6005929112434387, 1.4630693197250366, 1.3423976671433165e-16), (1.8773924112319946, 1.0828299522399902, 4.1469663718474636e-16), (1.5223431587219238, 1.6035150289535522, 3.3962937455573846e-16), (0.918250560760498, 2.0240094661712646, 2.858504851109545e-16), (0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16), (0.08592691272497177, 0.5636681318283081, -2.0147902877750112e-16), (0.52218097448349, 0.47179681062698364, -1.3953357705088321e-16), (0.7485123872756958, 0.7740142345428467, -2.0697516087443826e-16), (1.0257539749145508, 0.27251502871513367, -1.303518590166548e-16), (0.6727041006088257, 0.2193627655506134, -9.056141429331018e-17), (0.6731530427932739, -0.2053752839565277, -2.412352522117238e-18), (1.0283035039901733, -0.2637050747871399, -1.409913306792752e-17), (0.7504342794418335, -0.7479293346405029, 1.0711562769110121e-16), (0.5203362107276917, -0.4711986780166626, 6.45972074820057e-17), (0.15535776317119598, -0.6831546425819397, 1.3447239637236116e-16), (0.28157803416252136, -1.020136833190918, 1.969111653814159e-16), (-0.2764538824558258, -1.0215308666229248, 2.3565229510179005e-16), (-0.15191972255706787, -0.6839203834533691, 1.5580709167088805e-16), (-0.5179504156112671, -0.4737990200519562, 1.3667537024949198e-16), (-0.746666431427002, -0.7516481280326843, 2.11073675373516e-16), (-1.0269376039505005, -0.26891738176345825, 1.2851938264460893e-16), (-0.6721401810646057, -0.2084762454032898, 9.121006947733956e-17), (-0.6736156940460205, 0.21515318751335144, 2.216130598363787e-18), (-1.0275888442993164, 0.2699747681617737, 1.41311565381619e-17), (-0.7507237792015076, 0.7631686329841614, -1.0711789747470206e-16), (-0.5293189287185669, 0.4840444028377533, -6.418310763247186e-17), (-0.08592691272497177, 0.5636681318283081, -2.0147902877750112e-16), (-0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16)]
+    cvTuples['Spine setting'] = [(-0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16), (-0.918250560760498, 2.0240094661712646, 2.858504851109545e-16), (-1.5223431587219238, 1.6035150289535522, 3.3962937455573846e-16), (-1.8773924112319946, 1.0828299522399902, 4.1469663718474636e-16), (-0.6005929112434387, 1.4630693197250366, 1.3423976671433165e-16), (-2.4890353679656982, 0.29243525862693787, 5.524171534469215e-16), (-2.223422050476074, 2.4896340370178223, 4.938351901445117e-16), (-2.083423137664795, 1.2679976224899292, 4.625790920556767e-16), (-1.687940001487732, 1.8989613056182861, -3.7479749431146737e-16), (-0.9688037037849426, 2.360983371734619, -2.1511787388485106e-16), (7.258404366439208e-05, 2.508406162261963, 1.693115606156445e-20), (0.9686800241470337, 2.360907554626465, 2.150873012894111e-16), (1.6874980926513672, 1.8986189365386963, 3.747094028849529e-16), (2.083423137664795, 1.2679976224899292, 4.625790920556767e-16), (2.223422050476074, 2.4896340370178223, 4.938351901445117e-16), (2.4890353679656982, 0.29243525862693787, 5.524171534469215e-16), (0.6005929112434387, 1.4630693197250366, 1.3423976671433165e-16), (1.8773924112319946, 1.0828299522399902, 4.1469663718474636e-16), (1.5223431587219238, 1.6035150289535522, 3.3962937455573846e-16), (0.918250560760498, 2.0240094661712646, 2.858504851109545e-16), (0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16), (0.08592691272497177, 0.5636681318283081, -2.0147902877750112e-16),
+                                 (0.52218097448349, 0.47179681062698364, -1.3953357705088321e-16), (0.7485123872756958, 0.7740142345428467, -2.0697516087443826e-16), (1.0257539749145508, 0.27251502871513367, -1.303518590166548e-16), (0.6727041006088257, 0.2193627655506134, -9.056141429331018e-17), (0.6731530427932739, -0.2053752839565277, -2.412352522117238e-18), (1.0283035039901733, -0.2637050747871399, -1.409913306792752e-17), (0.7504342794418335, -0.7479293346405029, 1.0711562769110121e-16), (0.5203362107276917, -0.4711986780166626, 6.45972074820057e-17), (0.15535776317119598, -0.6831546425819397, 1.3447239637236116e-16), (0.28157803416252136, -1.020136833190918, 1.969111653814159e-16), (-0.2764538824558258, -1.0215308666229248, 2.3565229510179005e-16), (-0.15191972255706787, -0.6839203834533691, 1.5580709167088805e-16), (-0.5179504156112671, -0.4737990200519562, 1.3667537024949198e-16), (-0.746666431427002, -0.7516481280326843, 2.11073675373516e-16), (-1.0269376039505005, -0.26891738176345825, 1.2851938264460893e-16), (-0.6721401810646057, -0.2084762454032898, 9.121006947733956e-17), (-0.6736156940460205, 0.21515318751335144, 2.216130598363787e-18), (-1.0275888442993164, 0.2699747681617737, 1.41311565381619e-17), (-0.7507237792015076, 0.7631686329841614, -1.0711789747470206e-16), (-0.5293189287185669, 0.4840444028377533, -6.418310763247186e-17), (-0.08592691272497177, 0.5636681318283081, -2.0147902877750112e-16), (-0.08684861660003662, 2.1479909420013428, 1.7355837438138622e-16)]
 
     cvTuples['Circle One Arrow'] = [
         (1.099320267429756, -1.6524720822501887e-18, -0.35719078779323343),
